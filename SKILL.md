@@ -1,188 +1,224 @@
 ---
 name: defi-transcript-analyzer
 description: >
-  Use this skill whenever the user provides a YouTube transcript, subtitle file (.srt, .vtt, .txt),
-  or raw text dump from a video/talk/podcast and wants it summarized, analyzed, or distilled into
-  structured research notes. Trigger on phrases like "tóm tắt transcript", "phân tích video này",
-  "extract info from this talk", "note lại nội dung video", "summarize this presentation",
-  or any request involving transcript/subtitle content from conferences (EthCC, Devcon, ETHDenver,
-  DeFi-related talks), protocol deep-dives, founder interviews, or technical presentations.
-  Also trigger when the user pastes a large block of conversational text that looks like a transcript
-  (timestamped lines, speaker labels, subtitle formatting). This skill is designed for DeFi/crypto
-  research contexts but works for any technical transcript.
+  Use this skill whenever the user provides a YouTube transcript, subtitle file
+  (.srt, .vtt, .txt), or raw transcript-like text from a video, talk, podcast,
+  panel, interview, or technical presentation and wants it summarized, analyzed,
+  or distilled into structured research notes. Trigger on requests such as
+  "summarize this transcript", "analyze this video", "extract insights from this
+  talk", "turn these subtitles into research notes", or any request involving
+  conference talks from EthCC, Devcon, ETHDenver, DeFi events, protocol deep
+  dives, founder interviews, market discussions, governance calls, or technical
+  workshops. Also trigger when the user pastes a large block of timestamped,
+  speaker-labeled, subtitle-formatted, or auto-caption text that looks like a
+  transcript. The skill is optimized for DeFi and crypto research, but it can be
+  used for any technical transcript.
 ---
 
 # DeFi Transcript Analyzer
 
 ## Purpose
 
-Extract maximum research value from video transcripts and subtitles. Conference talks, protocol
-presentations, founder interviews, and technical deep-dives contain dense alpha that is hard to
-skim. This skill turns raw transcripts into structured, actionable research notes.
+Extract high-signal research value from video transcripts and subtitles.
+Conference talks, protocol presentations, founder interviews, panels, and
+technical deep dives often contain dense information that is difficult to skim.
+Use this skill to turn raw transcripts into structured, actionable research
+notes.
 
-## Step 1: Identify the transcript format and clean it
+## Step 1: Identify and Clean the Transcript
 
-Transcripts arrive in many forms. Detect the format and normalize before analysis.
+Detect the transcript format before analyzing it.
 
-**Common formats:**
-- `.srt` / `.vtt` — timestamped subtitle files. Strip timing metadata and sequence numbers,
-  merge lines into coherent paragraphs.
-- Raw paste — a wall of text the user copied from YouTube's auto-generated captions.
-  These often lack punctuation and have word-boundary errors. Mentally correct as you parse.
-- Speaker-labeled transcript — lines prefixed with speaker names (e.g., from podcasts or panels).
-  Preserve speaker attribution, it matters for sourcing claims.
-- Auto-generated captions — watch for hallucinated words, misheard technical terms
-  (e.g., "uniswap" → "you knees wap", "rollup" → "roll up", "EIP" → "EAP").
+Common formats:
 
-**Cleaning rules:**
-1. Remove all timestamp lines (`00:01:23,456 --> 00:01:25,789` etc.)
-2. Remove sequence numbers from `.srt` files
-3. Merge fragmented subtitle lines into full sentences
-4. Fix obvious auto-caption errors for crypto/DeFi terminology. Common misheards:
-   - Protocol names: Aave, Uniswap, Lido, Curve, Compound, MakerDAO, Kyber, etc.
-   - Technical terms: rollup, zkSNARK, zkSTARK, EVM, EIP, MEV, PBS, sequencer,
-     attestation, finality, slashing, staking, bridging, oracle
-   - Standards: ERC-20, ERC-721, ERC-1155, ERC-4337, EIP-4844, EIP-7702
-5. If speaker labels exist, standardize them (`Speaker 1:` → use actual names if identifiable)
+- `.srt` or `.vtt`: Timestamped subtitle files. Strip timing metadata and
+  sequence numbers, then merge fragmented lines into coherent paragraphs.
+- Raw YouTube paste: A wall of auto-generated caption text. Expect weak
+  punctuation, broken sentence boundaries, and misheard technical terms.
+- Speaker-labeled transcript: Lines prefixed with speaker names. Preserve
+  speaker attribution because it matters for sourcing claims, debates, and
+  roadmap commitments.
+- Auto-generated captions: Watch for hallucinated or misheard crypto terms, such
+  as `Uniswap` rendered as unrelated words, `rollup` split into `roll up`, or
+  `EIP` heard as another acronym.
 
-## Step 2: Produce the structured summary
+Cleaning rules:
 
-Generate the output in the following structure. Always write in the **same language the user
-used in their request** (Vietnamese if they asked in Vietnamese, English if in English).
-If the user doesn't specify, default to Vietnamese with technical terms kept in English.
+1. Remove timestamp lines such as `00:01:23,456 --> 00:01:25,789`.
+2. Remove `.srt` sequence numbers.
+3. Merge fragmented subtitle lines into complete sentences where possible.
+4. Fix obvious auto-caption errors for crypto and DeFi terminology.
+5. Preserve speaker labels when present; replace generic labels with actual names
+   if they are clearly identifiable.
+6. Do not invent missing details. Mark unclear or corrupted transcript segments
+   as uncertain.
 
----
+Common terms to normalize:
 
-### Output Template
+- Protocols: Aave, Uniswap, Lido, Curve, Compound, MakerDAO, Kyber, EigenLayer,
+  Chainlink, L2Beat, Flashbots, Safe, Farcaster.
+- Technical terms: rollup, zkSNARK, zkSTARK, EVM, EIP, MEV, PBS, sequencer,
+  attestation, finality, slashing, staking, bridging, oracle, account
+  abstraction, intents, solver, liquidity, AMM, vault, restaking.
+- Standards and EIPs: ERC-20, ERC-721, ERC-1155, ERC-4337, EIP-4844, EIP-7702.
 
-```
-# [Tiêu đề / Title]
-> Video/Talk: [tên video nếu biết]
-> Speaker(s): [tên speaker nếu xác định được]
-> Event: [conference/podcast name nếu biết]
-> Duration: [ước lượng từ timestamps nếu có]
+## Step 2: Produce the Structured Summary
+
+Write the final output in English unless the user explicitly requests another
+language. Keep protocol names and technical terms in their canonical English
+forms.
+
+Use this Markdown template by default:
+
+```markdown
+# [Title]
+> Video/Talk: [Video or talk title, if known]
+> Speaker(s): [Speaker names, if identifiable]
+> Event: [Conference, podcast, panel, or source, if known]
+> Duration: [Estimate from timestamps, if available]
 
 ## TL;DR
-[2-3 câu tóm tắt core message của toàn bộ video. Phải trả lời được:
-"Video này nói về cái gì và tại sao nó quan trọng?"]
+[2-3 sentences explaining what the transcript is about and why it matters.]
 
 ## Key Points
-[Liệt kê 5-10 điểm chính, mỗi điểm là 1-3 câu.
-Ưu tiên thông tin MỚI, thông tin có thể ACTION được, và insight chưa phổ biến.
-KHÔNG liệt kê những thứ ai cũng biết rồi.]
+- [5-10 high-signal points. Each point should be 1-3 concise sentences.]
+- [Prioritize new information, actionable insight, non-obvious context, and
+  concrete claims.]
+- [Avoid generic background that any informed crypto reader already knows.]
 
 ## Technical Details
-[Phần này dành cho chi tiết kỹ thuật sâu. Bao gồm:]
 
 ### Architecture / Mechanism Design
-[Mô tả kiến trúc hệ thống, cơ chế hoạt động, flow chính.
-Nếu có thể, vẽ diagram dạng text/ASCII hoặc liệt kê flow theo bước.]
+[Describe system architecture, mechanism design, contract flow, protocol flow,
+security model, or operational process. Use a numbered flow or ASCII diagram if
+it improves clarity.]
 
 ### Parameters & Numbers
-[Mọi con số cụ thể được đề cập: TVL, APY, block time, gas cost,
-fee tiers, thresholds, limits, etc. Đây là loại info dễ bị mất nhất
-khi chỉ xem summary — luôn capture lại.]
+[Capture every concrete number mentioned: TVL, APY, block time, gas cost, fee
+tiers, thresholds, limits, risk parameters, market size, dates, timelines, or
+performance metrics. Do not round away useful detail.]
 
 ### Equations / Formulas
-[Nếu video đề cập công thức toán học, invariant, bonding curve,
-hay bất kỳ biểu thức nào — ghi lại chính xác.
-Dùng LaTeX notation nếu phức tạp.]
+[Record mathematical formulas, invariants, bonding curves, scoring functions,
+risk formulas, or economic relationships. Use LaTeX notation when helpful.]
 
 ## Competitive / Ecosystem Context
-[Video này liên quan đến protocol/project nào khác?
-So sánh với competitors được đề cập.
-Nằm ở đâu trong ecosystem map?]
+[Identify related protocols, competitors, standards, narratives, and ecosystem
+positions. Explain what the talk compares itself against, or what the closest
+comparison is if the speaker does not make one directly.]
 
 ## Actionable Insights for Research
-[Phần quan trọng nhất cho researcher. Trả lời:]
-- Có integration opportunity nào cho KyberSwap/Kyber Network không?
-- Có mechanism design nào đáng học hỏi/adapt không?
-- Có risk/vulnerability nào được tiết lộ không?
-- Có alpha chưa được thị trường price in không?
-- Cần follow-up research thêm về topic nào?
+- [Integration opportunity for KyberSwap, Kyber Network, DeFi protocols, wallets,
+  infra providers, or researchers.]
+- [Mechanism design worth studying or adapting.]
+- [Risk, vulnerability, operational weakness, or governance issue surfaced by the
+  transcript.]
+- [Potential market alpha or roadmap signal that may not be widely priced in.]
+- [Concrete follow-up research questions.]
 
 ## Quotes & Key Statements
-[Trích dẫn nguyên văn những câu nói quan trọng từ speaker.
-Chỉ giữ lại quotes có giá trị — tuyên bố chiến lược, tiết lộ roadmap,
-quan điểm controversial, hoặc technical claims quan trọng.
-Format: "[quote]" — Speaker Name, [timestamp nếu có]]
+- "[Short quote]" - [Speaker], [timestamp if available]
 
 ## References & Links
-[Mọi project, paper, EIP, tool, website được nhắc đến trong video.
-Liệt kê để dễ tra cứu sau.]
+- [Projects, papers, EIPs, tools, standards, or websites mentioned.]
 
 ## Tags
-[Gắn tags để dễ tìm kiếm sau. Ví dụ:]
 #DeFi #AMM #MEV #ZK #L2 #Bridge #Lending #Privacy #Governance
 ```
 
----
+Quote rules:
 
-## Step 3: Contextual enrichment
+- Include only high-value quotes: strategy claims, roadmap commitments,
+  controversial positions, security disclosures, mechanism explanations, or
+  unusually clear framing.
+- Keep quotes short. Prefer paraphrase for long passages.
+- Include timestamp and speaker when available.
 
-After producing the base summary, enhance it with contextual knowledge:
+## Step 3: Add Contextual Enrichment
 
-1. **Cross-reference protocols mentioned** — If the speaker mentions a protocol, briefly note
-   its current status (active, deprecated, hacked, forked) if you know.
-2. **Flag outdated information** — Conference talks age fast. If the transcript is from months
-   ago, note which claims may no longer be accurate (e.g., TVL figures, team changes, roadmap
-   items that may have shipped or been abandoned).
-3. **Connect to broader narratives** — Link the talk's themes to ongoing meta-narratives
-   in the space (e.g., modular vs monolithic, intent-based architectures, restaking wars,
-   L2 fragmentation, privacy regulation).
+After the base summary, enrich it with careful context:
 
-## Step 4: Adapt depth to content type
+1. Cross-reference protocols mentioned. If you know a protocol's current status,
+   note it briefly: active, deprecated, hacked, forked, merged, migrated, or
+   newly launched.
+2. Flag potentially outdated claims. Conference talks age quickly; note when TVL,
+   roadmap, team, regulatory, or market claims may have changed since recording.
+3. Connect the talk to broader narratives such as modular vs monolithic chains,
+   intent-based architecture, restaking, L2 fragmentation, privacy regulation,
+   tokenized RWAs, stablecoin distribution, or institutional DeFi.
+4. Separate transcript evidence from inference. Use phrasing like "The speaker
+   claims..." for transcript-backed points and "A likely implication is..." for
+   your own synthesis.
 
-Not all transcripts deserve the same treatment. Adjust your depth:
+## Step 4: Adapt Depth to Content Type
 
-**Deep technical talk** (protocol mechanism design, math-heavy, architecture deep-dive):
-→ Full template. Maximize Technical Details section. Include diagrams if possible.
-  Capture every parameter and formula.
+Adjust the summary based on the transcript type.
 
-**Panel discussion / debate**:
-→ Focus on Key Points and Quotes. Attribute claims to specific speakers.
-  Highlight disagreements — these are often the most valuable signal.
+Deep technical talk:
 
-**Founder/CEO interview**:
-→ Focus on TL;DR, Actionable Insights, and Quotes.
-  Extract roadmap commitments, strategic pivots, partnership hints.
-  These talks contain forward-looking alpha.
+- Maximize the Technical Details section.
+- Capture architecture, formulas, parameters, diagrams, attack surfaces, and
+  assumptions.
+- Do not collapse mechanism design into a vague product summary.
 
-**Tutorial / workshop**:
-→ Focus on Technical Details as a step-by-step guide.
-  The value is in the HOW, not the WHAT.
+Panel discussion or debate:
 
-**Market/macro commentary**:
-→ Focus on Parameters & Numbers, and Actionable Insights.
-  Capture specific predictions, timeframes, and reasoning.
+- Attribute claims to specific speakers.
+- Highlight disagreements, tradeoffs, and consensus points.
+- Treat Q&A and rebuttals as high-value signal.
 
-## Edge cases and common pitfalls
+Founder or CEO interview:
 
-- **Multi-topic talks**: Some conference talks cover 3-4 unrelated topics. Split the summary
-  into clearly labeled sections per topic rather than forcing a single narrative.
-- **Q&A sections**: The Q&A at the end of talks often contains the best alpha — speakers
-  are more candid and specific. Do NOT skip or downplay Q&A content.
-- **Humor and sarcasm**: Auto-captions can't convey tone. If a statement seems absurd,
-  consider whether it might be sarcastic or a joke before treating it as a factual claim.
-- **Multilingual content**: Some talks switch languages mid-stream (e.g., English presentation
-  with Vietnamese Q&A). Handle each language segment appropriately.
-- **Incomplete transcripts**: If the transcript is clearly cut off or has gaps, note this
-  explicitly so the reader knows the summary is partial.
+- Focus on TL;DR, roadmap signals, strategic positioning, partnerships, business
+  model, and actionable research insights.
+- Extract forward-looking commitments and strategic pivots.
 
-## Output format
+Tutorial or workshop:
 
-- Default: Markdown (`.md` file), suitable for Obsidian, Notion, or any knowledge base.
-- If the user requests a different format (PDF, docx), convert accordingly.
-- Filename convention: `YYYY-MM-DD_[event]_[speaker]_[short-topic].md`
-  - Example: `2026-04-15_EthCC9_vitalik_lean-ethereum.md`
+- Turn the transcript into a practical step-by-step guide.
+- Preserve commands, dependencies, contract addresses, code concepts, and setup
+  assumptions.
 
-## Quality checklist
+Market or macro commentary:
 
-Before delivering, verify:
-- [ ] TL;DR actually captures the core message (not just a topic label)
-- [ ] Numbers and parameters are captured (not rounded away or omitted)
-- [ ] Speaker attribution is correct (especially in panels)
-- [ ] Technical terms are spelled correctly
-- [ ] Actionable Insights section contains at least one concrete follow-up
-- [ ] No entire sections of the transcript were silently skipped
-- [ ] Tags are relevant and will aid future search
+- Capture specific predictions, timeframes, causal reasoning, market structure,
+  positioning, liquidity constraints, and risk assumptions.
+
+## Edge Cases and Pitfalls
+
+- Multi-topic talks: Split the summary into clearly labeled subsections rather
+  than forcing one narrative.
+- Q&A sections: Do not skip them. They often contain the most candid details.
+- Humor and sarcasm: If a statement sounds absurd, consider tone before treating
+  it as factual.
+- Multilingual transcripts: Summarize the content in English unless the user
+  explicitly asks otherwise. Preserve original technical terms and translate only
+  when meaning is clear.
+- Incomplete transcripts: State that the summary is partial and identify missing
+  or cut-off sections if visible.
+- Noisy captions: Correct obvious crypto terminology, but do not over-correct
+  ambiguous names, numbers, or claims.
+- Sponsor or marketing talks: Extract concrete product mechanics, customers,
+  metrics, or claims; avoid repeating promotional language.
+
+## Output Format
+
+- Default output: Markdown suitable for Notion, Obsidian, GitHub, or a research
+  knowledge base.
+- If writing files, use this naming convention:
+  `YYYY-MM-DD_event_speaker_short-topic.md`.
+- If the user asks for another format such as PDF, DOCX, or a Notion page, keep
+  the same analytical structure while adapting the container format.
+
+## Quality Checklist
+
+Before delivering, verify that:
+
+- The TL;DR captures the core message, not just the topic label.
+- Key numbers, parameters, dates, formulas, and EIPs are preserved.
+- Speaker attribution is correct, especially in panels.
+- Technical terms are spelled correctly.
+- Actionable Insights includes concrete follow-up research.
+- Q&A sections and late-transcript details were not silently skipped.
+- Claims from the transcript are separated from your own inference.
+- Tags are relevant and useful for future retrieval.

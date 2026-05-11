@@ -1,0 +1,36 @@
+{
+  "date_filter": {
+    "lookback_days": 1
+  },
+  "x_search": {
+    "enabled": false
+  },
+  "x_home": {
+    "enabled": true,
+    "max_items": 80
+  },
+  "x_following": {
+    "enabled": false
+  },
+  "x_profiles": {
+    "enabled": true,
+    "max_items_per_profile": 4,
+    "handles": [
+      "https://x.com/ethresearchbot",
+      "https://x.com/pashov",
+      "https://x.com/haydenzadams",
+      "https://x.com/spearbit",
+      "https://x.com/BlockSecTeam",
+      "https://x.com/WuBlockchain",
+      "https://x.com/apoorveth",
+      "https://x.com/etheconomiczone",
+      "https://x.com/DefiLlama",
+      "https://x.com/arkham",
+      "https://x.com/exvulsec",
+      "https://x.com/0xProject",
+      "https://x.com/0xfluid",
+      "https://x.com/ethereum",
+      "https://x.com/TheBlockCo"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "date": "",
+  "timezone": "Asia/Saigon",
+  "profile_dir": "profiles/ctb0k33",
+  "daily_research_config": "tools/daily_research/selected_x_profiles.config.json",
+  "output_dir": "outputs/daily_research",
+  "state_path": "outputs/daily_research/telegram_state.json",
+  "interval_minutes": 30,
+  "min_technical_score": 6,
+  "max_items_per_run": 8,
+  "send_empty_digest": false,
+  "send_run_markers": true,
+  "skip_ethresearch": false,
+  "headless": false
+}

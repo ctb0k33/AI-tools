@@ -76,3 +76,11 @@ Desktop.ini
 *.log
 tmp/
 temp/
+outputs/
+
+# Frontend
+node_modules/
+frontend/.devserver/
+
+#demo
+demo/

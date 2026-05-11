@@ -1,0 +1,2 @@
+"""Daily research digest tools."""
+

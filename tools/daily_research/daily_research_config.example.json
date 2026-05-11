@@ -1,0 +1,66 @@
+{
+  "date_filter": {
+    "lookback_days": 1
+  },
+  "x_search": {
+    "enabled": false
+  },
+  "x_queries": [
+    {
+      "name": "DeFi Protocol",
+      "category": "DeFi",
+      "query": "defi protocol"
+    },
+    {
+      "name": "DeFi Security",
+      "category": "DeFi",
+      "query": "defi security"
+    },
+    {
+      "name": "Ethereum Core",
+      "category": "Core Protocol",
+      "query": "ethereum core"
+    },
+    {
+      "name": "EIP",
+      "category": "Core Protocol",
+      "query": "EIP ethereum"
+    },
+    {
+      "name": "MEV",
+      "category": "Core Protocol",
+      "query": "MEV PBS ethereum"
+    }
+  ],
+  "ethresearch_endpoints": [
+    "https://ethresear.ch/new.json",
+    "https://ethresear.ch/latest.json"
+  ],
+  "keyword_categories": {
+    "DeFi": ["defi", "aave", "uniswap", "stablecoin", "rwa", "amm", "dex", "lending"],
+    "Core Protocol": ["eip", "peerdas", "epbs", "focil", "fusaka", "validator", "pbs", "mev", "stateless"],
+    "L2 and Data Availability": ["rollup", "blob", "blobs", "data availability", "danksharding"],
+    "ZK and Cryptography": ["zk", "zero knowledge", "snark", "stark", "proof", "kzg"],
+    "Security": ["security", "audit", "exploit", "formal verification", "fuzzing"]
+  },
+  "x_quality_filter": {
+    "min_technical_score": 4,
+    "include_replies": false,
+    "include_quotes": false
+  },
+  "x_home": {
+    "enabled": true,
+    "max_items": 80
+  },
+  "x_profiles": {
+    "enabled": false,
+    "max_items_per_profile": 4,
+    "handles": []
+  },
+  "x_following": {
+    "enabled": false,
+    "owner": "Ctb0k33",
+    "max_profiles": 80,
+    "max_items_per_profile": 4
+  }
+}

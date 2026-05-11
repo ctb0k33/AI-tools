@@ -1,0 +1,466 @@
+{
+  "date": "2026-05-10",
+  "timezone": "Asia/Saigon",
+  "generated_at": "2026-05-10T09:18:05.195177+00:00",
+  "date_filter": {
+    "lookback_days": 1,
+    "included_dates": [
+      "2026-05-09",
+      "2026-05-10"
+    ]
+  },
+  "stats": {
+    "total_items": 9,
+    "source_counts": {
+      "X": 9
+    },
+    "category_counts": {
+      "Security": 5,
+      "Other": 2,
+      "DeFi": 2,
+      "Core Protocol": 1,
+      "L2 and Data Availability": 1
+    }
+  },
+  "warnings": [
+    "X date validation skipped 33 items outside 2026-05-09 to 2026-05-10 and 5 items without timestamps.",
+    "X quality filter skipped 0 replies/comments and 2 quote/commentary posts and 26 low-technical-score items.",
+    "ethresear.ch endpoint failed (https://ethresear.ch/new.json): HTTP Error 403: Forbidden"
+  ],
+  "items": [
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "Security Alert: Renegade Dark Pool Exploit @renegade_fi suffered an exploit, resulting in the theft of 27 ERC-20 assets valued at ~$209K. Root Cause An unprotected `initializer`...",
+      "url": "https://x.com/exvulsec/status/2053402272340865389",
+      "category": "",
+      "author": "@exvulsec",
+      "published_at": "2026-05-10T09:10:26.000Z",
+      "text": "Security Alert: Renegade Dark Pool Exploit @renegade_fi suffered an exploit, resulting in the theft of 27 ERC-20 assets valued at ~$209K. Root Cause An unprotected `initializer` on the Dark Pool proxy allowed the attacker to inject malicious logic and execute it via",
+      "tags": [
+        "Security"
+      ],
+      "score": 8,
+      "raw": {
+        "query": "https://x.com/exvulsec",
+        "links": [
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec/status/2053402272340865389",
+          "https://x.com/renegade_fi",
+          "https://t.co/aV2kLDu3aG",
+          "https://t.co/aV2kLDu3aG",
+          "https://x.com/exvulsec/status/2053402272340865389/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "ExVul\n@exvulsec\n·\n7 phút\nSecurity Alert: Renegade Dark Pool Exploit\n\n\n@renegade_fi\n suffered an exploit, resulting in the theft of 27 ERC-20 assets valued at ~$209K.\n\n Root Cause\nAn unprotected `initializer` on the Dark Pool proxy allowed the attacker to inject malicious logic and execute it via\nHiển thị thêm\narbiscan.io\nArbitrum One Transaction Hash: 0x0e494685ac... | Arbitrum One\nCall 0x60806040 Method By 0x777253F2...2A9657777 | Success | May-10-2026 08:27:23 AM (UTC)\n1\n41",
+        "tweet_texts": [
+          "Security Alert: Renegade Dark Pool Exploit @renegade_fi suffered an exploit, resulting in the theft of 27 ERC-20 assets valued at ~$209K. Root Cause An unprotected `initializer` on the Dark Pool proxy allowed the attacker to inject malicious logic and execute it via"
+        ],
+        "summary": "Security Alert: Renegade Dark Pool Exploit @renegade_fi suffered an exploit, resulting in the theft of 27 ERC-20 assets valued at ~$209K. Root Cause An unprotected `initializer` on the Dark Pool proxy allowed the attacker to inject malicious logic and execute it via",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "exvulsec",
+        "technical_score": 8,
+        "technical_reasons": [
+          "erc",
+          "exploit",
+          "security",
+          "long_form"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Home Timeline",
+      "title": "【Cảnh báo】Bị rút tài sản qua ủy quyền EIP-7702. Lần này, khi tôi cố gắng rút LP USSI/USDC đã khóa trên SoSoValue sau giai đoạn cooldown, tài sản vừa quay về ví thì lập tức bị rú...",
+      "url": "https://x.com/tail_top_re/status/2053307378305839122",
+      "category": "",
+      "author": "@tail_top_re",
+      "published_at": "2026-05-10T02:53:22.000Z",
+      "text": "【Cảnh báo】Bị rút tài sản qua ủy quyền EIP-7702. Lần này, khi tôi cố gắng rút LP USSI/USDC đã khóa trên SoSoValue sau giai đoạn cooldown, tài sản vừa quay về ví thì lập tức bị rút mất. Ban đầu tôi nghĩ là nạn nhân của Approve, nhưng khi kiểm tra Basescan,",
+      "tags": [
+        "Core Protocol"
+      ],
+      "score": 8,
+      "raw": {
+        "query": "https://x.com/home",
+        "links": [
+          "https://x.com/tail_top_re",
+          "https://x.com/tail_top_re",
+          "https://x.com/tail_top_re",
+          "https://x.com/tail_top_re/status/2053307378305839122",
+          "https://x.com/tail_top_re/status/2053307378305839122/photo/1",
+          "https://x.com/tail_top_re/status/2053307378305839122/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "TailTop Re:Born\n@tail_top_re\n·\n6 giờ\nĐược dịch từ Tiếng Nhật\nHiện bản gốc\n【Cảnh báo】Bị rút tài sản qua ủy quyền EIP-7702.\n\nLần này, khi tôi cố gắng rút LP USSI/USDC đã khóa trên SoSoValue sau giai đoạn cooldown, tài sản vừa quay về ví thì lập tức bị rút mất.\n\nBan đầu tôi nghĩ là nạn nhân của Approve, nhưng khi kiểm tra Basescan,\nHiển thị thêm\n7\n44\n119\n13 N",
+        "tweet_texts": [
+          "【Cảnh báo】Bị rút tài sản qua ủy quyền EIP-7702. Lần này, khi tôi cố gắng rút LP USSI/USDC đã khóa trên SoSoValue sau giai đoạn cooldown, tài sản vừa quay về ví thì lập tức bị rút mất. Ban đầu tôi nghĩ là nạn nhân của Approve, nhưng khi kiểm tra Basescan,"
+        ],
+        "summary": "【Cảnh báo】Bị rút tài sản qua ủy quyền EIP-7702. Lần này, khi tôi cố gắng rút LP USSI/USDC đã khóa trên SoSoValue sau giai đoạn cooldown, tài sản vừa quay về ví thì lập tức bị rút mất.",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "",
+        "technical_score": 8,
+        "technical_reasons": [
+          "eip",
+          "long_form",
+          "numbered_standard"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Home Timeline",
+      "title": "Community Alert @renegade_fi (Arbitrum) was exploited for ~$209K. An unprotected initializer on the Dark Pool proxy let the attacker inject logic and delegatecall it in the prox...",
+      "url": "https://x.com/blockaid_/status/2053395937708384587",
+      "category": "",
+      "author": "@blockaid_",
+      "published_at": "2026-05-10T08:45:16.000Z",
+      "text": "Community Alert @renegade_fi (Arbitrum) was exploited for ~$209K. An unprotected initializer on the Dark Pool proxy let the attacker inject logic and delegatecall it in the proxy's storage, draining 27 ERC-20s. Exploit Tx: https:// arbiscan.io/tx/0x0e494685a ce16d372066c5b4db959b58ebac6d88166c2d9d618e0e421dc0c77e … More details in",
+      "tags": [
+        "Security"
+      ],
+      "score": 7,
+      "raw": {
+        "query": "https://x.com/home",
+        "links": [
+          "https://x.com/blockaid_",
+          "https://x.com/blockaid_",
+          "https://x.com/blockaid_",
+          "https://x.com/blockaid_/status/2053395937708384587",
+          "https://x.com/renegade_fi",
+          "https://t.co/jWaIqCxXTH",
+          "https://t.co/jWaIqCxXTH",
+          "https://t.co/jWaIqCxXTH",
+          "https://x.com/blockaid_/status/2053395937708384587/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "Blockaid\n@blockaid_\n·\n31 phút\n Community Alert\n\n@renegade_fi\n (Arbitrum) was exploited for ~$209K.\n\nAn unprotected initializer on the Dark Pool proxy let the attacker inject logic and delegatecall it in the proxy's storage, draining 27 ERC-20s.\n\nExploit Tx: \nhttps://\narbiscan.io/tx/0x0e494685a\nce16d372066c5b4db959b58ebac6d88166c2d9d618e0e421dc0c77e\n…\n\nMore details in\narbiscan.io\nArbitrum One Transaction Hash: 0x0e494685ac... | Arbitrum One\nCall 0x60806040 Method By 0x777253F2...2A9657777 | Success | May-10-2026 08:27:23 AM (UTC)\n4\n6\n20\n859",
+        "tweet_texts": [
+          "Community Alert @renegade_fi (Arbitrum) was exploited for ~$209K. An unprotected initializer on the Dark Pool proxy let the attacker inject logic and delegatecall it in the proxy's storage, draining 27 ERC-20s. Exploit Tx: https:// arbiscan.io/tx/0x0e494685a ce16d372066c5b4db959b58ebac6d88166c2d9d618e0e421dc0c77e … More details in"
+        ],
+        "summary": "Community Alert @renegade_fi (Arbitrum) was exploited for ~$209K. An unprotected initializer on the Dark Pool proxy let the attacker inject logic and delegatecall it in the proxy's storage, draining 27 ERC-20s.",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "",
+        "technical_score": 7,
+        "technical_reasons": [
+          "erc",
+          "exploit",
+          "long_form",
+          "has_link"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Home Timeline",
+      "title": "crypto/web3 salaries (annual) in ETH: Smart Contract Auditor: 52 104 ETH Smart Contract Developer: 35",
+      "url": "https://x.com/0x3b33/status/2053343592815456722",
+      "category": "",
+      "author": "@0x3b33",
+      "published_at": "2026-05-10T05:17:16.000Z",
+      "text": "crypto/web3 salaries (annual) in ETH: Smart Contract Auditor: 52 - 104 ETH Smart Contract Developer: 35 - 78 ETH Product Manager: 43 - 87 ETH Developer Relations: 39 - 78 ETH Researcher: 43 - 87 ETH Designer: 26 - 57 ETH Marketing Manager: 22 - 52 ETH",
+      "tags": [
+        "Security"
+      ],
+      "score": 7,
+      "raw": {
+        "query": "https://x.com/home",
+        "links": [
+          "https://x.com/0x3b33",
+          "https://x.com/0x3b33",
+          "https://x.com/0x3b33",
+          "https://x.com/0x3b33/status/2053343592815456722",
+          "https://x.com/0x3b33/status/2053343592815456722/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "Pyro\n@0x3b33\n·\n3 giờ\ncrypto/web3 salaries (annual) in ETH:\n\nSmart Contract Auditor: 52 - 104 ETH\nSmart Contract Developer: 35 - 78 ETH\nProduct Manager: 43 - 87 ETH\nDeveloper Relations: 39 - 78 ETH\nResearcher: 43 - 87 ETH\nDesigner: 26 - 57 ETH\nMarketing Manager: 22 - 52 ETH\n4\n35\n1 N",
+        "tweet_texts": [
+          "crypto/web3 salaries (annual) in ETH: Smart Contract Auditor: 52 - 104 ETH Smart Contract Developer: 35 - 78 ETH Product Manager: 43 - 87 ETH Developer Relations: 39 - 78 ETH Researcher: 43 - 87 ETH Designer: 26 - 57 ETH Marketing Manager: 22 - 52 ETH"
+        ],
+        "summary": "crypto/web3 salaries (annual) in ETH: Smart Contract Auditor: 52 104 ETH Smart Contract Developer: 35",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "",
+        "technical_score": 7,
+        "technical_reasons": [
+          "research",
+          "audit",
+          "design",
+          "long_form"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "​We're hosting the first EEZ community call on May 13 at 3:00 PM CET, live on X and YouTube. ​What we'll cover: ​• The technical architecture of EEZ framework, Rollup 0 and how...",
+      "url": "https://x.com/etheconomiczone/status/2053173965418385528",
+      "category": "",
+      "author": "@etheconomiczone",
+      "published_at": "2026-05-09T18:03:14.000Z",
+      "text": "EEZ Call #1 is on. ​We're hosting the first EEZ community call on May 13 at 3:00 PM CET, live on X and YouTube. ​What we'll cover: ​• The technical architecture of EEZ framework, Rollup 0 and how it's implemented on Ethereum • @ziskvm and the proving stack • What this means",
+      "tags": [
+        "L2 and Data Availability"
+      ],
+      "score": 6,
+      "raw": {
+        "query": "https://x.com/etheconomiczone",
+        "links": [
+          "https://x.com/etheconomiczone",
+          "https://x.com/etheconomiczone",
+          "https://x.com/etheconomiczone",
+          "https://x.com/etheconomiczone/status/2053173965418385528",
+          "https://x.com/ziskvm",
+          "https://x.com/etheconomiczone/status/2053173965418385528/photo/1",
+          "https://x.com/etheconomiczone/status/2053173965418385528/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "The Ethereum Economic Zone\n@etheconomiczone\n·\n15 giờ\nEEZ Call #1 is on.\n\n​We're hosting the first EEZ community call on May 13 at 3:00 PM CET, live on X and YouTube.\n\n​What we'll cover:\n\n​• The technical architecture of EEZ framework, Rollup 0 and how it's implemented on Ethereum\n• \n@ziskvm\n and the proving stack\n• What this means\nHiển thị thêm\n2\n7\n52\n1 N",
+        "tweet_texts": [
+          "EEZ Call #1 is on. ​We're hosting the first EEZ community call on May 13 at 3:00 PM CET, live on X and YouTube. ​What we'll cover: ​• The technical architecture of EEZ framework, Rollup 0 and how it's implemented on Ethereum • @ziskvm and the proving stack • What this means"
+        ],
+        "summary": "​We're hosting the first EEZ community call on May 13 at 3:00 PM CET, live on X and YouTube. ​What we'll cover: ​• The technical architecture of EEZ framework, Rollup 0 and how it's implemented on Ethereum • @ziskvm and the proving stack • What this means",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "etheconomiczone",
+        "technical_score": 6,
+        "technical_reasons": [
+          "architecture",
+          "rollup",
+          "long_form"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "Strategy CEO Says BTC Sales Would Only Happen Under Specific Conditions Strategy CEO Phong Le told CNBC the firm will only sell Bitcoin under specific conditions, such as fundin...",
+      "url": "https://x.com/WuBlockchain/status/2053353808005120513",
+      "category": "",
+      "author": "@WuBlockchain",
+      "published_at": "2026-05-10T05:57:51.000Z",
+      "text": "Strategy CEO Says BTC Sales Would Only Happen Under Specific Conditions Strategy CEO Phong Le told CNBC the firm will only sell Bitcoin under specific conditions, such as funding the 11.5% dividend on its STRC preferred stock or for tax optimization. Le stressed that the",
+      "tags": [],
+      "score": 4,
+      "raw": {
+        "query": "https://x.com/WuBlockchain",
+        "links": [
+          "https://x.com/WuBlockchain",
+          "https://x.com/WuBlockchain",
+          "https://x.com/WuBlockchain",
+          "https://x.com/WuBlockchain/status/2053353808005120513",
+          "https://x.com/WuBlockchain/status/2053353808005120513/photo/1",
+          "https://x.com/WuBlockchain/status/2053353808005120513/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "Wu Blockchain\n@WuBlockchain\n·\n3 giờ\nStrategy CEO Says BTC Sales Would Only Happen Under Specific Conditions\n\nStrategy CEO Phong Le told CNBC the firm will only sell Bitcoin under specific conditions, such as funding the 11.5% dividend on its STRC preferred stock or for tax optimization.\n\nLe stressed that the\nHiển thị thêm\n13\n2\n29\n7 N",
+        "tweet_texts": [
+          "Strategy CEO Says BTC Sales Would Only Happen Under Specific Conditions Strategy CEO Phong Le told CNBC the firm will only sell Bitcoin under specific conditions, such as funding the 11.5% dividend on its STRC preferred stock or for tax optimization. Le stressed that the"
+        ],
+        "summary": "Strategy CEO Says BTC Sales Would Only Happen Under Specific Conditions Strategy CEO Phong Le told CNBC the firm will only sell Bitcoin under specific conditions, such as funding the 11.5% dividend on its STRC preferred stock or for tax optimization.",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "WuBlockchain",
+        "technical_score": 4,
+        "technical_reasons": [
+          "spec",
+          "long_form"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "Security Alert: Heisenberg HEIST HeisenbergHook Uniswap V4 hook Chain: Ethereum Loss: ~0.42 ETH profit. Target: HeisenbergHook at 0xbea90eed6b2d07e8d66894969ed6d0a5ba242ac8 Atta...",
+      "url": "https://x.com/exvulsec/status/2053184363182047697",
+      "category": "",
+      "author": "@exvulsec",
+      "published_at": "2026-05-09T18:44:33.000Z",
+      "text": "Security Alert: Heisenberg HEIST HeisenbergHook Uniswap V4 hook Chain: Ethereum Loss: ~0.42 ETH profit. Target: HeisenbergHook at 0xbea90eed6b2d07e8d66894969ed6d0a5ba242ac8 Attack Tx: https:// etherscan.io/tx/0x938216ea4 2de19146d7bb073df71085b0b59ee200ba892f731a517af14d74789 … Summary: An attacker used a 10 WETH Morpho flash loan to",
+      "tags": [
+        "DeFi",
+        "Security"
+      ],
+      "score": 4,
+      "raw": {
+        "query": "https://x.com/exvulsec",
+        "links": [
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec/status/2053184363182047697",
+          "https://t.co/wnP9B1CF4j",
+          "https://t.co/wnP9B1CF4j",
+          "https://t.co/wnP9B1CF4j",
+          "https://x.com/exvulsec/status/2053184363182047697/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "ExVul\n@exvulsec\n·\n14 giờ\n   Security Alert: Heisenberg HEIST HeisenbergHook Uniswap V4 hook\nChain: Ethereum\nLoss: ~0.42 ETH profit.\nTarget: HeisenbergHook at 0xbea90eed6b2d07e8d66894969ed6d0a5ba242ac8\nAttack Tx:\n\nhttps://\netherscan.io/tx/0x938216ea4\n2de19146d7bb073df71085b0b59ee200ba892f731a517af14d74789\n…\n\nSummary: An attacker used a 10 WETH Morpho flash loan to\nHiển thị thêm\nEthereum Transaction Hash: 0x938216ea42... | Etherscan\nTừ etherscan.io\n3\n19\n1 N",
+        "tweet_texts": [
+          "Security Alert: Heisenberg HEIST HeisenbergHook Uniswap V4 hook Chain: Ethereum Loss: ~0.42 ETH profit. Target: HeisenbergHook at 0xbea90eed6b2d07e8d66894969ed6d0a5ba242ac8 Attack Tx: https:// etherscan.io/tx/0x938216ea4 2de19146d7bb073df71085b0b59ee200ba892f731a517af14d74789 … Summary: An attacker used a 10 WETH Morpho flash loan to"
+        ],
+        "summary": "Security Alert: Heisenberg HEIST HeisenbergHook Uniswap V4 hook Chain: Ethereum Loss: ~0.42 ETH profit. Target: HeisenbergHook at 0xbea90eed6b2d07e8d66894969ed6d0a5ba242ac8 Attack Tx: https:// etherscan.io/tx/0x938216ea4 2de19146d7bb073df71085b0b59ee200ba892f731a517af14d74789 … Summary: An attacker used a 10 WETH Morpho flash loan to",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "exvulsec",
+        "technical_score": 4,
+        "technical_reasons": [
+          "security",
+          "long_form",
+          "has_link"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "Security Alert: BlastFOMO BlastFOMOVault () Reward-claim logic abuse Chain: BSC Loss: ~1.28 BNB profit. Target: BlastFOMOVault (0xbfb18b2c1c1b6b099f0e2b1e962c03210f24900e) Attac...",
+      "url": "https://x.com/exvulsec/status/2053176958880747994",
+      "category": "",
+      "author": "@exvulsec",
+      "published_at": "2026-05-09T18:15:07.000Z",
+      "text": "Security Alert: BlastFOMO BlastFOMOVault () Reward-claim logic abuse Chain: BSC Loss: ~1.28 BNB profit. Target: BlastFOMOVault (0xbfb18b2c1c1b6b099f0e2b1e962c03210f24900e) Attack Tx: https:// bscscan.com/tx/0x0e37a1ba8 ae064a10286abbe6bc9c7f89078c252f5db9d3e78115be8d4f189f3 … Summary: The attacker used a 120 WBNB flash loan from ListaDAO",
+      "tags": [
+        "DeFi",
+        "Security"
+      ],
+      "score": 4,
+      "raw": {
+        "query": "https://x.com/exvulsec",
+        "links": [
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec",
+          "https://x.com/exvulsec/status/2053176958880747994",
+          "https://t.co/BFRUMnZI3f",
+          "https://x.com/exvulsec/status/2053176958880747994/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "ExVul\n@exvulsec\n·\n15 giờ\n   Security Alert: BlastFOMO BlastFOMOVault () Reward-claim logic abuse\nChain: BSC\nLoss: ~1.28 BNB profit.\nTarget: BlastFOMOVault (0xbfb18b2c1c1b6b099f0e2b1e962c03210f24900e)\nAttack Tx:\n\nhttps://\nbscscan.com/tx/0x0e37a1ba8\nae064a10286abbe6bc9c7f89078c252f5db9d3e78115be8d4f189f3\n…\n\nSummary: The attacker used a 120 WBNB flash loan from ListaDAO\nHiển thị thêm\n5\n25\n2 N",
+        "tweet_texts": [
+          "Security Alert: BlastFOMO BlastFOMOVault () Reward-claim logic abuse Chain: BSC Loss: ~1.28 BNB profit. Target: BlastFOMOVault (0xbfb18b2c1c1b6b099f0e2b1e962c03210f24900e) Attack Tx: https:// bscscan.com/tx/0x0e37a1ba8 ae064a10286abbe6bc9c7f89078c252f5db9d3e78115be8d4f189f3 … Summary: The attacker used a 120 WBNB flash loan from ListaDAO"
+        ],
+        "summary": "Security Alert: BlastFOMO BlastFOMOVault () Reward-claim logic abuse Chain: BSC Loss: ~1.28 BNB profit. Target: BlastFOMOVault (0xbfb18b2c1c1b6b099f0e2b1e962c03210f24900e) Attack Tx: https:// bscscan.com/tx/0x0e37a1ba8 ae064a10286abbe6bc9c7f89078c252f5db9d3e78115be8d4f189f3 … Summary: The attacker used a 120 WBNB flash loan from ListaDAO",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "exvulsec",
+        "technical_score": 4,
+        "technical_reasons": [
+          "security",
+          "long_form",
+          "has_link"
+        ]
+      }
+    },
+    {
+      "source": "X",
+      "section": "Configured Profiles",
+      "title": "I spoke to a web3 dev who told me he ran x-ray & felt a bit embarassed he didn't use it before deploying his project It built a threat model, showing him (and will show his user...",
+      "url": "https://x.com/pashov/status/2052813886064087323",
+      "category": "",
+      "author": "@pashov",
+      "published_at": "2026-05-08T18:12:24.000Z",
+      "text": "I spoke to a web3 dev who told me he ran x-ray & felt a bit embarassed he didn't use it before deploying his project It built a threat model, showing him (and will show his users/investors if they run it) some serious flaws in the architecture. Use x-ray.",
+      "tags": [],
+      "score": 4,
+      "raw": {
+        "query": "https://x.com/pashov",
+        "links": [
+          "https://x.com/pashov",
+          "https://x.com/pashov",
+          "https://x.com/pashov",
+          "https://x.com/pashov/status/2052813886064087323",
+          "https://t.co/uMLjvpOXvV",
+          "https://t.co/uMLjvpOXvV",
+          "https://x.com/pashov/status/2052813886064087323/analytics"
+        ],
+        "backend": "playwright",
+        "article_text": "pashov\n@pashov\n·\n9 thg 5\nI spoke to a web3 dev who told me he ran x-ray & felt a bit embarassed he didn't use it before deploying his project\n\nIt built a threat model, showing him (and will show his users/investors if they run it) some serious flaws in the architecture. Use x-ray.\nGitHub - pashov/skills: Pashov Audit Group Skills\nTừ github.com\n5\n8\n91\n3 N",
+        "tweet_texts": [
+          "I spoke to a web3 dev who told me he ran x-ray & felt a bit embarassed he didn't use it before deploying his project It built a threat model, showing him (and will show his users/investors if they run it) some serious flaws in the architecture. Use x-ray."
+        ],
+        "summary": "I spoke to a web3 dev who told me he ran x-ray & felt a bit embarassed he didn't use it before deploying his project It built a threat model, showing him (and will show his users/investors if they run it) some serious flaws in the architecture.",
+        "is_reply": false,
+        "is_quote": false,
+        "source_profile": "pashov",
+        "technical_score": 4,
+        "technical_reasons": [
+          "architecture",
+          "long_form"
+        ]
+      }
+    }
+  ],
+  "config": {
+    "x_search": {
+      "enabled": false
+    },
+    "x_queries": [
+      {
+        "name": "DeFi Protocol",
+        "category": "DeFi",
+        "query": "defi protocol"
+      },
+      {
+        "name": "DeFi Security",
+        "category": "DeFi",
+        "query": "defi security"
+      },
+      {
+        "name": "Ethereum Core",
+        "category": "Core Protocol",
+        "query": "ethereum core"
+      },
+      {
+        "name": "EIP",
+        "category": "Core Protocol",
+        "query": "EIP ethereum"
+      },
+      {
+        "name": "MEV",
+        "category": "Core Protocol",
+        "query": "MEV PBS ethereum"
+      }
+    ],
+    "x_home": {
+      "enabled": true,
+      "max_items": 80
+    },
+    "x_profiles": {
+      "enabled": true,
+      "handles": [
+        "https://x.com/ethresearchbot",
+        "https://x.com/pashov",
+        "https://x.com/haydenzadams",
+        "https://x.com/spearbit",
+        "https://x.com/BlockSecTeam",
+        "https://x.com/WuBlockchain",
+        "https://x.com/apoorveth",
+        "https://x.com/etheconomiczone",
+        "https://x.com/DefiLlama",
+        "https://x.com/arkham",
+        "https://x.com/exvulsec",
+        "https://x.com/0xProject",
+        "https://x.com/0xfluid",
+        "https://x.com/ethereum",
+        "https://x.com/TheBlockCo"
+      ],
+      "max_items_per_profile": 4
+    },
+    "x_following": {
+      "enabled": false,
+      "owner": "Ctb0k33",
+      "max_profiles": 80,
+      "max_items_per_profile": 4
+    },
+    "ethresearch_endpoints": [
+      "https://ethresear.ch/new.json",
+      "https://ethresear.ch/latest.json"
+    ]
+  }
+}
