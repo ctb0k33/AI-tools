@@ -11,5 +11,5 @@
   "send_empty_digest": false,
   "send_run_markers": true,
   "skip_ethresearch": false,
-  "headless": false
+  "headless": true
 }

@@ -116,6 +116,10 @@ Important config fields:
 - `min_technical_score`: minimum score before sending an item.
 - `max_items_per_run`: max Telegram items per run.
 - `skip_ethresearch`: set `true` to only use X.
+- `headless`: set `true` for the scheduled Telegram bot so Chrome runs in the background.
+
+The Telegram bot defaults to `headless: true` to avoid browser popups. For manual
+debugging, use the dashboard or run `daily_research_tool` without `--headless`.
 
 Test without sending:
 
