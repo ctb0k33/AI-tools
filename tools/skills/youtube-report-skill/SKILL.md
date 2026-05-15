@@ -111,7 +111,7 @@ For each topic:
 
 ## Step 3: Analyze each transcript
 
-Use the `defi-transcript-analyzer` skill for transcript interpretation. Follow its cleaning,
+Use the `defi-transcript-analyzer` (.codex\skills\defi-transcript-analyzer) skill for transcript interpretation. Follow its cleaning,
 technical-detail, and quality-check guidance, but emit exactly the five sections below for
 each topic:
 
