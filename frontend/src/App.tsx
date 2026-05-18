@@ -1,7 +1,9 @@
 import {
   AlertTriangle,
   BarChart3,
+  Bookmark,
   CalendarDays,
+  EyeOff,
   ExternalLink,
   FileJson,
   Filter,
@@ -10,23 +12,43 @@ import {
   Play,
   RefreshCw,
   Search,
+  ThumbsDown,
+  ThumbsUp,
   Upload,
+  Users,
 } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import type { DigestApiResponse, DigestItem, DigestPayload, Filters } from "./types";
+import type { DigestApiResponse, DigestItem, DigestPayload, FeedbackAction, Filters } from "./types";
 import {
   formatDateTime,
+  getDisplayTitle,
   getHost,
+  getPersonalizationAdjustment,
   getPrimaryCategory,
   getScore,
   getSummary,
   getTags,
+  getTechnicalScore,
   groupBySection,
   matchesText,
   uniqueSorted,
 } from "./utils";
 
 const SAMPLE_PATH = "/sample/daily_research_digest.json";
+const ROLE_STORAGE_KEY = "dailyResearchRole";
+const DEFAULT_ROLE = "researcher";
+const FALLBACK_ROLES: RoleOption[] = [
+  { id: "researcher", label: "Researcher", description: "Technical protocol and DeFi research" },
+  { id: "bd", label: "BD", description: "Partnerships, integrations, and adoption" },
+  { id: "marketing", label: "Marketing", description: "Narratives, campaigns, and market attention" },
+  { id: "operations", label: "Operations", description: "Incidents, upgrades, and operational alerts" },
+];
+
+type RoleOption = {
+  id: string;
+  label: string;
+  description?: string;
+};
 
 const DEFAULT_FILTERS: Filters = {
   query: "",
@@ -45,17 +67,85 @@ function App() {
     kind: "idle",
     message: "",
   });
+  const [feedbackByKey, setFeedbackByKey] = useState<Record<string, FeedbackAction>>({});
+  const [feedbackToast, setFeedbackToast] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const [isCollecting, setIsCollecting] = useState(false);
   const [collectionDate, setCollectionDate] = useState(() => todayForInput());
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>(FALLBACK_ROLES);
+  const [selectedRole, setSelectedRole] = useState(() => localStorage.getItem(ROLE_STORAGE_KEY) || DEFAULT_ROLE);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    loadSample();
+    loadRoleOptions();
   }, []);
 
-  async function loadSample() {
+  useEffect(() => {
+    localStorage.setItem(ROLE_STORAGE_KEY, selectedRole);
+    setFeedbackByKey({});
+    loadInitialDigest(selectedRole);
+  }, [selectedRole]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  function showFeedbackToast(kind: "success" | "error", message: string) {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+    setFeedbackToast({ kind, message });
+    toastTimerRef.current = window.setTimeout(() => {
+      setFeedbackToast(null);
+      toastTimerRef.current = null;
+    }, 3200);
+  }
+
+  async function loadRoleOptions() {
+    try {
+      const payload = await requestApi("/api/roles");
+      if (Array.isArray(payload.roles) && payload.roles.length) {
+        setRoleOptions(payload.roles);
+      }
+    } catch {
+      setRoleOptions(FALLBACK_ROLES);
+    }
+  }
+
+  async function loadInitialDigest(roleId = selectedRole) {
     setLoadError("");
-    setApiStatus({ kind: "idle", message: "" });
+    setApiStatus({ kind: "running", message: "Loading latest generated output..." });
+    try {
+      const today = todayForInput();
+      const payload = await requestApi(`/api/latest?role=${encodeURIComponent(roleId)}&date=${encodeURIComponent(today)}`);
+      if (!payload.digest) throw new Error("API response did not include a digest.");
+      setDigest(payload.digest);
+      setFilters(DEFAULT_FILTERS);
+      setApiStatus({
+        kind: "success",
+        message: `Loaded ${payload.paths?.json || "latest digest output"}.`,
+      });
+      return;
+    } catch {
+      try {
+        const payload = await requestApi(`/api/latest?role=${encodeURIComponent(roleId)}`);
+        if (!payload.digest) throw new Error("API response did not include a digest.");
+        setDigest(payload.digest);
+        setFilters(DEFAULT_FILTERS);
+        setApiStatus({
+          kind: "success",
+          message: `Loaded latest available output: ${payload.paths?.json || "daily_research_digest.json"}.`,
+        });
+        return;
+      } catch {
+        await loadSample("API output was not available, so the bundled sample was loaded.");
+      }
+    }
+  }
+
+  async function loadSample(statusMessage = "") {
+    setLoadError("");
+    setApiStatus({ kind: statusMessage ? "success" : "idle", message: statusMessage });
     try {
       const response = await fetch(SAMPLE_PATH, { cache: "no-store" });
       if (!response.ok) throw new Error(`Sample data returned ${response.status}`);
@@ -71,7 +161,9 @@ function App() {
     setLoadError("");
     setApiStatus({ kind: "running", message: `Loading latest output for ${collectionDate}...` });
     try {
-      const payload = await requestApi(`/api/latest?date=${encodeURIComponent(collectionDate)}`);
+      const payload = await requestApi(
+        `/api/latest?role=${encodeURIComponent(selectedRole)}&date=${encodeURIComponent(collectionDate)}`,
+      );
       if (!payload.digest) throw new Error("API response did not include a digest.");
       setDigest(payload.digest);
       setFilters(DEFAULT_FILTERS);
@@ -98,9 +190,8 @@ function App() {
         body: JSON.stringify({
           date: collectionDate,
           timezone: "Asia/Saigon",
+          role: selectedRole,
           profileDir: "profiles/ctb0k33",
-          config: "tools/daily_research/selected_x_profiles.config.json",
-          outputDir: "outputs/daily_research",
           xBackend: "playwright",
         }),
       });
@@ -135,6 +226,44 @@ function App() {
       setLoadError(error instanceof Error ? error.message : "Could not parse JSON file.");
     } finally {
       event.target.value = "";
+    }
+  }
+
+  async function submitFeedback(item: DigestItem, action: FeedbackAction) {
+    const key = feedbackKey(item);
+    const previous = feedbackByKey[key];
+    const isClearing = previous === action;
+    setFeedbackByKey((current) => {
+      const next = { ...current };
+      if (isClearing) delete next[key];
+      else next[key] = action;
+      return next;
+    });
+    try {
+      await requestApi("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: isClearing ? "clear" : action,
+          item,
+          role: selectedRole,
+          reason: isClearing ? `dashboard_toggle_clear:${action}` : "",
+        }),
+      });
+      showFeedbackToast(
+        "success",
+        isClearing
+          ? `${feedbackLabel(action)} feedback cleared.`
+          : `Feedback saved: ${feedbackLabel(action)}. It will influence future ranking.`,
+      );
+    } catch (error) {
+      setFeedbackByKey((current) => {
+        const next = { ...current };
+        if (previous) next[key] = previous;
+        else delete next[key];
+        return next;
+      });
+      showFeedbackToast("error", formatApiError(error));
     }
   }
 
@@ -173,6 +302,19 @@ function App() {
           <h1>DeFi / Core News Dashboard</h1>
         </div>
         <div className="header-actions">
+          <label className="role-control">
+            <span>Role</span>
+            <div>
+              <Users size={16} />
+              <select value={selectedRole} onChange={(event) => setSelectedRole(event.target.value)}>
+                {roleOptions.map((role) => (
+                  <option value={role.id} key={role.id}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </label>
           <label className="date-control">
             <span>Run date</span>
             <input type="date" value={collectionDate} onChange={(event) => setCollectionDate(event.target.value)} />
@@ -205,6 +347,13 @@ function App() {
         <div className="alert">
           <AlertTriangle size={18} />
           <span>{loadError}</span>
+        </div>
+      ) : null}
+
+      {feedbackToast ? (
+        <div className={`feedback-toast feedback-toast-${feedbackToast.kind}`} role="status" aria-live="polite">
+          {feedbackToast.kind === "error" ? <AlertTriangle size={18} /> : <FileJson size={18} />}
+          <span>{feedbackToast.message}</span>
         </div>
       ) : null}
 
@@ -275,7 +424,12 @@ function App() {
                 </div>
                 <div className="news-list">
                   {sectionItems.map((item) => (
-                    <NewsCard key={`${item.url}-${item.title}`} item={item} />
+                    <NewsCard
+                      key={`${item.url}-${item.title}`}
+                      item={item}
+                      selectedFeedback={feedbackByKey[feedbackKey(item)]}
+                      onFeedback={submitFeedback}
+                    />
                   ))}
                 </div>
               </section>
@@ -366,11 +520,22 @@ function Warnings({ warnings }: { warnings: string[] }) {
   );
 }
 
-function NewsCard({ item }: { item: DigestItem }) {
+function NewsCard({
+  item,
+  selectedFeedback,
+  onFeedback,
+}: {
+  item: DigestItem;
+  selectedFeedback?: FeedbackAction;
+  onFeedback: (item: DigestItem, action: FeedbackAction) => void;
+}) {
   const score = getScore(item);
+  const technicalScore = getTechnicalScore(item);
+  const personalizationAdjustment = getPersonalizationAdjustment(item);
   const tags = getTags(item);
   const category = getPrimaryCategory(item);
   const reasons = item.raw?.technical_reasons || [];
+  const personalizationReasons = item.raw?.personalization_reasons || [];
   const host = getHost(item.url);
 
   return (
@@ -380,8 +545,14 @@ function NewsCard({ item }: { item: DigestItem }) {
         <span>{item.source}</span>
         <span>{formatDateTime(item.published_at)}</span>
         {score ? <strong>Score {score}</strong> : null}
+        {personalizationAdjustment ? (
+          <span className={personalizationAdjustment > 0 ? "score-boost" : "score-penalty"}>
+            Personal {personalizationAdjustment > 0 ? "+" : ""}
+            {personalizationAdjustment}
+          </span>
+        ) : null}
       </div>
-      <h3>{item.title}</h3>
+      <h3>{getDisplayTitle(item)}</h3>
       <p>{getSummary(item)}</p>
       <div className="meta-row">
         {item.author ? <button className="text-chip">{item.author}</button> : null}
@@ -397,6 +568,47 @@ function NewsCard({ item }: { item: DigestItem }) {
             {reason}
           </span>
         ))}
+        {personalizationReasons.slice(0, 3).map((reason) => (
+          <span className="personal-reason" key={reason}>
+            {reason}
+          </span>
+        ))}
+      </div>
+      {personalizationAdjustment ? (
+        <div className="score-note">
+          Base technical score {technicalScore}; personalized ranking adjusted this item by {personalizationAdjustment > 0 ? "+" : ""}
+          {personalizationAdjustment}.
+        </div>
+      ) : null}
+      <div className="feedback-row" aria-label="Feedback controls">
+        <FeedbackButton
+          action="interested"
+          active={selectedFeedback === "interested"}
+          icon={<ThumbsUp size={14} />}
+          label="Interested"
+          onClick={() => onFeedback(item, "interested")}
+        />
+        <FeedbackButton
+          action="save"
+          active={selectedFeedback === "save"}
+          icon={<Bookmark size={14} />}
+          label="Save"
+          onClick={() => onFeedback(item, "save")}
+        />
+        <FeedbackButton
+          action="not_relevant"
+          active={selectedFeedback === "not_relevant"}
+          icon={<ThumbsDown size={14} />}
+          label="Not relevant"
+          onClick={() => onFeedback(item, "not_relevant")}
+        />
+        <FeedbackButton
+          action="hide_author"
+          active={selectedFeedback === "hide_author"}
+          icon={<EyeOff size={14} />}
+          label="Hide author"
+          onClick={() => onFeedback(item, "hide_author")}
+        />
       </div>
       {item.text ? (
         <details className="post-body">
@@ -414,6 +626,27 @@ function NewsCard({ item }: { item: DigestItem }) {
   );
 }
 
+function FeedbackButton({
+  action,
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  action: FeedbackAction;
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className={`feedback-button feedback-${action} ${active ? "active" : ""}`} type="button" onClick={onClick}>
+      {icon}
+      {label}
+    </button>
+  );
+}
+
 function getTopAuthors(items: DigestItem[]): Array<[string, number]> {
   const counts = new Map<string, number>();
   for (const item of items) {
@@ -427,6 +660,20 @@ function getTopAuthors(items: DigestItem[]): Array<[string, number]> {
 
 function slug(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "other";
+}
+
+function feedbackKey(item: DigestItem): string {
+  return item.url || `${item.author || ""}::${item.title}`;
+}
+
+function feedbackLabel(action: FeedbackAction): string {
+  const labels: Record<FeedbackAction, string> = {
+    interested: "Interested",
+    save: "Saved",
+    not_relevant: "Not relevant",
+    hide_author: "Hide author",
+  };
+  return labels[action];
 }
 
 async function requestApi(path: string, init?: RequestInit): Promise<DigestApiResponse> {

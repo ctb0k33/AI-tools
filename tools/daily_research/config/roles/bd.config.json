@@ -1,0 +1,115 @@
+{
+  "role": {
+    "id": "bd",
+    "label": "BD",
+    "description": "Business development signal tracking for integrations, partnerships, launches, ecosystem growth, customers, and market structure."
+  },
+  "output_dir": "outputs/daily_research/bd",
+  "date_filter": {
+    "lookback_days": 1
+  },
+  "personalization": {
+    "enabled": true,
+    "feedback_path": "outputs/daily_research/feedback/bd.json"
+  },
+  "x_search": {
+    "enabled": false
+  },
+  "x_home": {
+    "enabled": true,
+    "max_items": 100
+  },
+  "x_profiles": {
+    "enabled": true,
+    "max_items_per_profile": 5,
+    "handles": [
+      "https://x.com/0xProject",
+      "https://x.com/0xfluid",
+      "https://x.com/DefiLlama",
+      "https://x.com/TheBlockCo",
+      "https://x.com/WuBlockchain",
+      "https://x.com/ethereum",
+      "https://x.com/etheconomiczone",
+      "https://x.com/haydenzadams",
+      "https://x.com/apoorveth"
+    ]
+  },
+  "keyword_categories": {
+    "Partnerships": [
+      "partnership",
+      "partner",
+      "integration",
+      "integrated",
+      "collaboration",
+      "ecosystem"
+    ],
+    "Product Launches": [
+      "launch",
+      "mainnet",
+      "beta",
+      "release",
+      "rollout",
+      "go live"
+    ],
+    "Customers and Adoption": [
+      "customer",
+      "merchant",
+      "institution",
+      "enterprise",
+      "adoption",
+      "volume",
+      "users"
+    ],
+    "DeFi Market Structure": [
+      "liquidity",
+      "routing",
+      "aggregator",
+      "dex",
+      "lending",
+      "rwa",
+      "stablecoin"
+    ],
+    "Funding and Strategy": [
+      "funding",
+      "raise",
+      "acquisition",
+      "strategy",
+      "expansion",
+      "revenue"
+    ]
+  },
+  "x_quality_filter": {
+    "min_technical_score": 3,
+    "include_replies": false,
+    "include_quotes": true,
+    "positive_terms": {
+      "partnership": 4,
+      "integration": 4,
+      "launch": 3,
+      "mainnet": 3,
+      "customer": 3,
+      "institution": 3,
+      "volume": 2,
+      "users": 2,
+      "revenue": 3,
+      "ecosystem": 2
+    },
+    "low_value_terms": [
+      "gm",
+      "airdrop",
+      "giveaway",
+      "whitelist",
+      "meme",
+      "price prediction"
+    ],
+    "generic_terms": [
+      "partnership",
+      "integration",
+      "launch",
+      "customer",
+      "ecosystem",
+      "liquidity",
+      "revenue"
+    ]
+  }
+}

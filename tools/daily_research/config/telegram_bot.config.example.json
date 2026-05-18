@@ -1,0 +1,29 @@
+{
+  "role": "researcher",
+  "date": "",
+  "timezone": "Asia/Saigon",
+  "profile_dir": "profiles/ctb0k33",
+  "daily_research_config": "",
+  "output_dir": "",
+  "state_path": "outputs/daily_research/telegram_state_researcher.json",
+  "lock_path": "outputs/daily_research/telegram_bot.lock",
+  "feedback_path": "",
+  "interval_minutes": 30,
+  "feedback_poll_seconds": 5,
+  "min_technical_score": 6,
+  "max_items_per_run": 8,
+  "send_empty_digest": false,
+  "send_run_markers": true,
+  "enable_telegram_feedback": true,
+  "enable_telegram_commands": true,
+  "skip_ethresearch": false,
+  "headless": true,
+  "dashboard": {
+    "api_host": "127.0.0.1",
+    "api_port": 8765,
+    "frontend_host": "127.0.0.1",
+    "frontend_port": 5173,
+    "open_browser": true,
+    "log_dir": "outputs/daily_research/dashboard_logs"
+  }
+}

@@ -31,7 +31,7 @@ POST /api/collect
 The API bridge runs:
 
 ```powershell
-python -m tools.daily_research.daily_research_tool --date <YYYY-MM-DD> --profile-dir profiles\ctb0k33 --config tools\daily_research\selected_x_profiles.config.json --output-dir outputs\daily_research
+python -m tools.daily_research.daily_research_tool --date <YYYY-MM-DD> --profile-dir profiles\ctb0k33 --config tools\daily_research\config\selected_x_profiles.config.json --output-dir outputs\daily_research
 ```
 
 When the script finishes, the new JSON digest is loaded directly into the dashboard.

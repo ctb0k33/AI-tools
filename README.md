@@ -95,6 +95,73 @@ outputs/conference_reports/<event_slug>/
 Use this workflow when you want important X / ethresear.ch updates pushed to
 Telegram automatically.
 
+### Code Layout
+
+The daily research tool is split by responsibility:
+
+```text
+tools/daily_research/
+|-- daily_research_tool.py        # public CLI entrypoint
+|-- telegram_digest_bot.py        # public Telegram bot entrypoint
+|-- dashboard_api.py              # public dashboard API entrypoint
+|-- register_telegram_commands.py # public command-registration entrypoint
+|-- core/                         # models, config, role loading, feedback, scoring
+|-- collectors/                   # Playwright runner and Chrome CDP backend
+|-- reports/                      # JSON/Markdown digest rendering
+|-- telegram/                     # Telegram commands, state, API helpers, bot loop
+|-- dashboard/                    # local HTTP API implementation
+|-- audit/                        # following-account audit utility
+|-- scripts/                      # Python helper scripts
+`-- config/                       # tool, Telegram, profile, and role JSON config
+```
+
+### Role Profiles
+
+The daily research collector and Telegram bot can be tuned for different roles.
+Role configs live in:
+
+```text
+tools/daily_research/config/roles/
+|-- researcher.config.json
+|-- bd.config.json
+|-- marketing.config.json
+`-- operations.config.json
+```
+
+Each role controls:
+
+- X profiles and home timeline scan limits.
+- Keyword categories and scoring weights.
+- Low-value filters.
+- Output directory.
+- Feedback store used for personalized ranking.
+
+Run the collector for a specific role:
+
+```powershell
+python -m tools.daily_research.daily_research_tool `
+  --role researcher `
+  --date 2026-05-16 `
+  --profile-dir "profiles\ctb0k33"
+```
+
+Other roles:
+
+```powershell
+python -m tools.daily_research.daily_research_tool --role bd
+python -m tools.daily_research.daily_research_tool --role marketing
+python -m tools.daily_research.daily_research_tool --role operations
+```
+
+Default role output examples:
+
+```text
+outputs/daily_research/researcher/
+outputs/daily_research/bd/
+outputs/daily_research/marketing/
+outputs/daily_research/operations/
+```
+
 Set Telegram credentials:
 
 ```powershell
@@ -105,21 +172,110 @@ $env:TELEGRAM_CHAT_ID="<YOUR_CHAT_ID>"
 Optional config file:
 
 ```text
-tools/daily_research/telegram_bot.config.example.json
+tools/daily_research/config/telegram_bot.config.example.json
 ```
 
 Important config fields:
 
+- `role`: role profile used by the Telegram bot, usually `researcher`, `bd`, `marketing`, or `operations`.
 - `interval_minutes`: default polling interval, usually `30`.
 - `profile_dir`: browser profile for X, default `profiles/ctb0k33`.
-- `daily_research_config`: source/filter config.
+- `daily_research_config`: optional extra override config. Leave empty to use the selected role config directly.
+- `state_path`: local state file used for sent-post de-duplication and Telegram runtime settings.
+- `lock_path`: process lock that prevents multiple Telegram bot instances from sending duplicate posts.
 - `min_technical_score`: minimum score before sending an item.
 - `max_items_per_run`: max Telegram items per run.
 - `skip_ethresearch`: set `true` to only use X.
 - `headless`: set `true` for the scheduled Telegram bot so Chrome runs in the background.
+- `enable_telegram_feedback`: adds inline feedback buttons to each Telegram post.
+- `enable_telegram_commands`: enables bot commands such as `/role` and `/dashboard`.
+- `feedback_path`: shared feedback store used by the dashboard and Telegram bot.
+- `feedback_poll_seconds`: command/feedback polling interval when the bot runs continuously, usually `5`.
+- `dashboard`: local dashboard launcher settings used by the `/dashboard` Telegram command.
 
 The Telegram bot defaults to `headless: true` to avoid browser popups. For manual
 debugging, use the dashboard or run `daily_research_tool` without `--headless`.
+
+Telegram feedback buttons:
+
+```text
+Interested | Save | Not relevant | Hide author
+```
+
+The bot writes button clicks to:
+
+```text
+outputs/daily_research/feedback/<role>.json
+```
+
+With the scheduled-task `--once` runner, feedback clicks are processed on the
+next scheduled run. For immediate button feedback, run the bot continuously:
+
+```powershell
+python -m tools.daily_research.telegram_digest_bot
+```
+
+When continuous mode is active, Telegram button clicks are acknowledged within
+the configured `feedback_poll_seconds` window and the selected button is marked
+with `[x]`. Click the selected `[x]` button again to clear the active feedback
+and return the post to its initial button state.
+
+Telegram commands:
+
+```text
+/help
+/status
+/run
+/run bd
+/interval
+/interval 10m
+/interval 1h
+/interval reset
+/roles
+/role
+/role researcher
+/role bd
+/role marketing
+/role operations
+/dashboard
+/dashboard_stop
+```
+
+Register these commands in Telegram's command menu:
+
+```powershell
+python -m tools.daily_research.register_telegram_commands
+```
+
+Run this once after setting `TELEGRAM_BOT_TOKEN`. The bot can still process
+typed commands before registration, but Telegram will not show them in the `/`
+autocomplete menu until `setMyCommands` has been called.
+
+The selected Telegram role is stored in the bot state file, so a user who only
+uses Telegram can switch roles without opening the dashboard. Future collection
+runs use that active role's profile list, scoring rules, output directory, and
+feedback store.
+
+`/status` shows the active role, current interval, last run, queued immediate
+run status, and dashboard API/frontend status.
+
+`/run` queues an immediate collection run with the active role. `/run bd` runs
+one immediate collection with the BD role without permanently changing the
+active role.
+
+`/interval` shows the current interval. `/interval 10m`, `/interval 30`, and
+`/interval 1h` update the running bot's interval without restarting it.
+`/interval reset` returns to the config file value.
+
+`/dashboard` starts the local Python API and Vite frontend if they are not
+already running, opens the browser on the machine running the bot, and sends the
+dashboard URL back to Telegram. The default URL is `http://127.0.0.1:5173/`.
+That local URL only works on the same computer; from a phone, use a LAN host,
+VPN, or tunnel if you need remote access.
+
+`/dashboard_stop` stops only the dashboard API and frontend processes that were
+started by `/dashboard`. The Telegram bot keeps running. You can also send
+`/dashboard stop`.
 
 Test without sending:
 
@@ -143,6 +299,20 @@ Install as a Windows Scheduled Task:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task.ps1
+```
+
+Install as a hidden Windows Scheduled Task, so no PowerShell window pops up:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task_hidden.ps1
+```
+
+Install as a hidden continuous background task, so inline feedback buttons work
+immediately between collection runs:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task_hidden.ps1 -Continuous
+Start-ScheduledTask -TaskName "DailyResearchTelegramBot"
 ```
 
 Task controls:
@@ -181,19 +351,32 @@ npm.cmd run dev
 
 Open the URL printed by Vite. From the UI you can:
 
+- Select a role profile: Researcher, BD, Marketing, or Operations.
 - Pick a target date.
 - Run collection for that date.
 - Load the latest generated digest.
 - Upload a JSON digest manually.
+- Mark items as `Interested`, `Save`, `Not relevant`, or `Hide author`.
+
+Feedback is stored locally at:
+
+```text
+outputs/daily_research/feedback_store.json
+```
+
+Future runs use this feedback to adjust ranking. Positive feedback boosts matching
+authors and technical signals; negative feedback lowers similar items or hidden
+authors. The raw technical score is preserved, while `personalized_score` is used
+for dashboard sorting and Telegram selection.
 
 Direct script usage:
 
 ```powershell
 python -m tools.daily_research.daily_research_tool `
+  --role researcher `
   --date 2026-05-10 `
   --profile-dir "profiles\ctb0k33" `
-  --config "tools\daily_research\selected_x_profiles.config.json" `
-  --output-dir "outputs\daily_research"
+  --output-dir "outputs\daily_research\researcher"
 ```
 
 Useful options:

@@ -1,6 +1,15 @@
 {
+  "role": {
+    "id": "researcher",
+    "label": "Researcher"
+  },
+  "output_dir": "outputs/daily_research/researcher",
   "date_filter": {
     "lookback_days": 1
+  },
+  "personalization": {
+    "enabled": true,
+    "feedback_path": "outputs/daily_research/feedback/researcher.json"
   },
   "x_search": {
     "enabled": false

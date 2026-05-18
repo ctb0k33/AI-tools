@@ -1,0 +1,118 @@
+{
+  "role": {
+    "id": "operations",
+    "label": "Operations",
+    "description": "Operational awareness for incidents, exploits, downtime, governance deadlines, migrations, upgrades, and urgent ecosystem changes."
+  },
+  "output_dir": "outputs/daily_research/operations",
+  "date_filter": {
+    "lookback_days": 1
+  },
+  "personalization": {
+    "enabled": true,
+    "feedback_path": "outputs/daily_research/feedback/operations.json"
+  },
+  "x_search": {
+    "enabled": false
+  },
+  "x_home": {
+    "enabled": true,
+    "max_items": 100
+  },
+  "x_profiles": {
+    "enabled": true,
+    "max_items_per_profile": 6,
+    "handles": [
+      "https://x.com/pashov",
+      "https://x.com/spearbit",
+      "https://x.com/BlockSecTeam",
+      "https://x.com/exvulsec",
+      "https://x.com/WuBlockchain",
+      "https://x.com/TheBlockCo",
+      "https://x.com/ethereum",
+      "https://x.com/arkham"
+    ]
+  },
+  "keyword_categories": {
+    "Incidents": [
+      "incident",
+      "exploit",
+      "hack",
+      "attack",
+      "loss",
+      "pause",
+      "halted",
+      "drained"
+    ],
+    "Security": [
+      "security",
+      "audit",
+      "vulnerability",
+      "bug",
+      "postmortem",
+      "root cause"
+    ],
+    "Network and Protocol Ops": [
+      "upgrade",
+      "fork",
+      "client",
+      "validator",
+      "node",
+      "outage",
+      "downtime"
+    ],
+    "Governance and Deadlines": [
+      "proposal",
+      "vote",
+      "deadline",
+      "governance",
+      "migration",
+      "deprecation"
+    ],
+    "Monitoring": [
+      "alert",
+      "status",
+      "risk",
+      "exposure",
+      "affected",
+      "mitigation"
+    ]
+  },
+  "x_quality_filter": {
+    "min_technical_score": 3,
+    "include_replies": false,
+    "include_quotes": true,
+    "positive_terms": {
+      "incident": 5,
+      "exploit": 5,
+      "attack": 5,
+      "loss": 3,
+      "paused": 4,
+      "halted": 4,
+      "vulnerability": 4,
+      "postmortem": 4,
+      "root cause": 4,
+      "upgrade": 3,
+      "migration": 3,
+      "deadline": 3,
+      "alert": 4,
+      "mitigation": 4
+    },
+    "low_value_terms": [
+      "price prediction",
+      "airdrop",
+      "giveaway",
+      "portfolio",
+      "meme"
+    ],
+    "generic_terms": [
+      "incident",
+      "security",
+      "alert",
+      "upgrade",
+      "migration",
+      "governance",
+      "monitoring"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "role": {
+    "id": "marketing",
+    "label": "Marketing",
+    "description": "Narrative, campaign, KOL, competitor, community, product launch, and market attention monitoring."
+  },
+  "output_dir": "outputs/daily_research/marketing",
+  "date_filter": {
+    "lookback_days": 1
+  },
+  "personalization": {
+    "enabled": true,
+    "feedback_path": "outputs/daily_research/feedback/marketing.json"
+  },
+  "x_search": {
+    "enabled": false
+  },
+  "x_home": {
+    "enabled": true,
+    "max_items": 120
+  },
+  "x_profiles": {
+    "enabled": true,
+    "max_items_per_profile": 5,
+    "handles": [
+      "https://x.com/DefiLlama",
+      "https://x.com/TheBlockCo",
+      "https://x.com/WuBlockchain",
+      "https://x.com/ethereum",
+      "https://x.com/0xProject",
+      "https://x.com/haydenzadams",
+      "https://x.com/arkham"
+    ]
+  },
+  "keyword_categories": {
+    "Narratives": [
+      "narrative",
+      "trend",
+      "attention",
+      "mindshare",
+      "sentiment",
+      "cycle"
+    ],
+    "Campaigns": [
+      "campaign",
+      "launch",
+      "announcement",
+      "event",
+      "community call",
+      "twitter space",
+      "ama"
+    ],
+    "Competitors": [
+      "competitor",
+      "market share",
+      "dominance",
+      "positioning",
+      "comparison"
+    ],
+    "Product Messaging": [
+      "product",
+      "feature",
+      "release",
+      "use case",
+      "user experience",
+      "ux"
+    ],
+    "KOL and Media": [
+      "thread",
+      "report",
+      "coverage",
+      "newsletter",
+      "podcast",
+      "interview"
+    ]
+  },
+  "x_quality_filter": {
+    "min_technical_score": 3,
+    "include_replies": false,
+    "include_quotes": true,
+    "positive_terms": {
+      "narrative": 4,
+      "market share": 4,
+      "announcement": 3,
+      "campaign": 3,
+      "community call": 3,
+      "twitter space": 3,
+      "report": 3,
+      "coverage": 2,
+      "sentiment": 3,
+      "mindshare": 3
+    },
+    "low_value_terms": [
+      "drop your wallet",
+      "giveaway",
+      "whitelist",
+      "100x",
+      "cashtag"
+    ],
+    "generic_terms": [
+      "narrative",
+      "campaign",
+      "announcement",
+      "sentiment",
+      "mindshare",
+      "report",
+      "coverage"
+    ]
+  }
+}

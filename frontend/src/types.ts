@@ -13,6 +13,9 @@ export type DigestItem = {
     summary?: string;
     technical_score?: number;
     technical_reasons?: string[];
+    personalized_score?: number;
+    personalization_adjustment?: number;
+    personalization_reasons?: string[];
     source_profile?: string;
     links?: string[];
     [key: string]: unknown;
@@ -20,6 +23,11 @@ export type DigestItem = {
 };
 
 export type DigestPayload = {
+  role?: {
+    id?: string;
+    label?: string;
+    description?: string;
+  };
   date: string;
   timezone: string;
   generated_at: string;
@@ -47,6 +55,11 @@ export type Filters = {
 
 export type DigestApiResponse = {
   digest?: DigestPayload;
+  roles?: Array<{
+    id: string;
+    label: string;
+    description?: string;
+  }>;
   paths?: {
     json?: string;
     markdown?: string;
@@ -55,4 +68,36 @@ export type DigestApiResponse = {
   command?: string;
   stdout?: string;
   error?: string;
+  ok?: boolean;
+  feedback?: {
+    path?: string;
+    record?: FeedbackRecord;
+    model?: PreferenceModel;
+    events?: FeedbackRecord[];
+  };
+};
+
+export type FeedbackAction = "interested" | "save" | "not_relevant" | "hide_author";
+
+export type FeedbackRecord = {
+  key: string;
+  action: string;
+  reason?: string;
+  created_at: string;
+  url?: string;
+  title?: string;
+  author?: string;
+  source?: string;
+  section?: string;
+  tags?: string[];
+  technical_reasons?: string[];
+  signals?: string[];
+};
+
+export type PreferenceModel = {
+  author_weights?: Record<string, number>;
+  signal_weights?: Record<string, number>;
+  hidden_authors?: string[];
+  url_feedback?: Record<string, string>;
+  feedback_count?: number;
 };

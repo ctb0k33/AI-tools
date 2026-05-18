@@ -1,5 +1,6 @@
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Continuous
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,12 +24,15 @@ $env:TELEGRAM_BOT_TOKEN = $Token
 $env:TELEGRAM_CHAT_ID = $ChatId
 
 $Python = (Get-Command python -ErrorAction Stop).Source
-$Args = @("-m", "tools.daily_research.telegram_digest_bot", "--once")
+$Args = @("-m", "tools.daily_research.telegram_digest_bot")
+if (-not $Continuous) {
+    $Args += "--once"
+}
 if ($DryRun) {
     $Args += "--dry-run"
 }
 
-"[{0}] Starting Telegram digest bot. DryRun={1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $DryRun | Out-File -FilePath $LogPath -Append -Encoding utf8
+"[{0}] Starting Telegram digest bot. DryRun={1} Continuous={2}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $DryRun, $Continuous | Out-File -FilePath $LogPath -Append -Encoding utf8
 & $Python @Args *>> $LogPath
 $ExitCode = $LASTEXITCODE
 "[{0}] Finished Telegram digest bot. ExitCode={1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $ExitCode | Out-File -FilePath $LogPath -Append -Encoding utf8

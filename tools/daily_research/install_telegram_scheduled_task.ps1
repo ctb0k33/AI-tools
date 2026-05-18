@@ -35,7 +35,7 @@ if (-not $TelegramChatId) {
 $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $Runner = Join-Path $PSScriptRoot "run_telegram_digest_bot.ps1"
 $PowerShell = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-$RunnerArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$Runner`""
+$RunnerArgs = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$Runner`""
 if ($DryRun) {
     $RunnerArgs += " -DryRun"
 }

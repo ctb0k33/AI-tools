@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .dashboard.api import DashboardHandler, build_parser, main, run_collection
+from .telegram.register_commands import COMMANDS, main, telegram_api_request
 
 
 if __name__ == "__main__":
