@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import signal
 import socket
 import subprocess
@@ -141,31 +142,50 @@ def start_dashboard_services(config: dict[str, Any]) -> str:
     log_dir = dashboard_log_dir(config)
 
     started: list[str] = []
+    errors: list[str] = []
     if not is_port_open(api_host, api_port):
-        process = popen_hidden(
-            [sys.executable, "-m", "tools.daily_research.dashboard_api", "--host", api_host, "--port", str(api_port)],
-            PROJECT_ROOT,
-            log_dir / "dashboard_api.out.log",
-            log_dir / "dashboard_api.err.log",
-        )
-        write_pid_file(log_dir / "dashboard_api.pid", process)
-        started.append("API")
-        time.sleep(1.5)
+        try:
+            process = popen_hidden(
+                [sys.executable, "-m", "tools.daily_research.dashboard_api", "--host", api_host, "--port", str(api_port)],
+                PROJECT_ROOT,
+                log_dir / "dashboard_api.out.log",
+                log_dir / "dashboard_api.err.log",
+            )
+            write_pid_file(log_dir / "dashboard_api.pid", process)
+            started.append("API")
+            time.sleep(1.5)
+        except OSError as exc:
+            errors.append(f"Dashboard API failed to start: {exc}")
 
     if not is_port_open(frontend_host, frontend_port):
         npm_cmd = "npm.cmd" if os.name == "nt" else "npm"
-        process = popen_hidden(
-            [npm_cmd, "run", "dev", "--", "--host", frontend_host, "--port", str(frontend_port)],
-            PROJECT_ROOT / "frontend",
-            log_dir / "frontend.out.log",
-            log_dir / "frontend.err.log",
-        )
-        write_pid_file(log_dir / "frontend.pid", process)
-        started.append("frontend")
-        time.sleep(1.5)
+        npm_path = shutil.which(npm_cmd)
+        if not npm_path:
+            errors.append("Frontend failed to start: npm was not found in this runtime.")
+        else:
+            try:
+                process = popen_hidden(
+                    [npm_path, "run", "dev", "--", "--host", frontend_host, "--port", str(frontend_port)],
+                    PROJECT_ROOT / "frontend",
+                    log_dir / "frontend.out.log",
+                    log_dir / "frontend.err.log",
+                )
+                write_pid_file(log_dir / "frontend.pid", process)
+                started.append("frontend")
+                time.sleep(1.5)
+            except OSError as exc:
+                errors.append(f"Frontend failed to start: {exc}")
 
-    frontend_url = f"http://{frontend_host}:{frontend_port}/"
-    api_url = f"http://{api_host}:{api_port}/api/health"
+    frontend_display_host = str(
+        dashboard_config.get("frontend_display_host")
+        or ("127.0.0.1" if frontend_host in {"0.0.0.0", "::"} else frontend_host)
+    )
+    api_display_host = str(
+        dashboard_config.get("api_display_host")
+        or ("127.0.0.1" if api_host in {"0.0.0.0", "::"} else api_host)
+    )
+    frontend_url = str(dashboard_config.get("frontend_url") or f"http://{frontend_display_host}:{frontend_port}/")
+    api_url = str(dashboard_config.get("api_url") or f"http://{api_display_host}:{api_port}/api/health")
     if open_browser:
         try:
             webbrowser.open(frontend_url)
@@ -173,15 +193,27 @@ def start_dashboard_services(config: dict[str, Any]) -> str:
             pass
 
     status = ", ".join(started) if started else "already running"
-    return "\n".join(
+    lines = [
+        f"<b>Dashboard {escape_html(status)}</b>",
+        f"Frontend: {frontend_url}",
+        f"API health: {api_url}",
+    ]
+    if errors:
+        lines.extend(
+            [
+                "",
+                "<b>Startup warnings</b>",
+                *[f"- {escape_html(error)}" for error in errors],
+                f"- Logs: <code>{escape_html(str(log_dir))}</code>",
+            ]
+        )
+    lines.extend(
         [
-            f"<b>Dashboard {escape_html(status)}</b>",
-            f"Frontend: {frontend_url}",
-            f"API health: {api_url}",
             "",
             "Note: <code>127.0.0.1</code> only opens on the machine running this bot. From a phone, use the same local network with a LAN host, VPN, or a tunnel.",
         ]
     )
+    return "\n".join(lines)
 
 
 def format_status_message(config: dict[str, Any], state: dict[str, Any]) -> str:

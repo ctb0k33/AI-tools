@@ -57,7 +57,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     },
     "x_following": {
         "enabled": False,
-        "owner": "Ctb0k33",
+        "owner": "",
         "max_profiles": 80,
         "max_items_per_profile": 4,
     },
@@ -490,9 +490,14 @@ def get_last_used_chrome_profile(user_data_dir: Path) -> str:
 
 
 def inspect_x_login_cookies(profile_dir: Path) -> tuple[bool | None, str]:
-    cookies_db = profile_dir / "Default" / "Network" / "Cookies"
+    cookie_candidates = [
+        profile_dir / "Default" / "Network" / "Cookies",
+        profile_dir / "Default" / "Cookies",
+    ]
+    cookies_db = next((candidate for candidate in cookie_candidates if candidate.exists()), cookie_candidates[0])
     if not cookies_db.exists():
-        return False, f"X profile cookies DB not found: {cookies_db}"
+        visible_candidates = ", ".join(str(candidate) for candidate in cookie_candidates)
+        return False, f"X profile cookies DB not found. Checked: {visible_candidates}"
     try:
         connection = sqlite3.connect(f"file:{cookies_db}?mode=ro", uri=True)
         try:
@@ -515,6 +520,64 @@ def inspect_x_login_cookies(profile_dir: Path) -> tuple[bool | None, str]:
         "X profile is not signed in: missing auth_token/ct0 cookies. "
         f"Visible X/Twitter cookie names: {visible}",
     )
+
+
+def _process_exists(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+
+
+def unlock_stale_chromium_profile(profile_dir: Path) -> list[str]:
+    lock_path = profile_dir / "SingletonLock"
+    if not lock_path.exists() and not lock_path.is_symlink():
+        return []
+
+    try:
+        lock_target = os.readlink(lock_path) if lock_path.is_symlink() else lock_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        return [f"Could not inspect Chromium profile lock {lock_path}: {exc}"]
+
+    current_host = socket.gethostname()
+    stale = True
+    detail = lock_target or "unknown lock target"
+    if "-" in lock_target:
+        lock_host, lock_pid_text = lock_target.rsplit("-", 1)
+        if lock_host == current_host:
+            try:
+                lock_pid = int(lock_pid_text)
+            except ValueError:
+                stale = True
+            else:
+                stale = not _process_exists(lock_pid)
+                if not stale:
+                    return [f"Chromium profile is actively locked by PID {lock_pid} on this container."]
+
+    if not stale:
+        return []
+
+    removed: list[str] = []
+    errors: list[str] = []
+    for name in ("SingletonLock", "SingletonCookie", "SingletonSocket"):
+        path = profile_dir / name
+        if not path.exists() and not path.is_symlink():
+            continue
+        try:
+            path.unlink()
+            removed.append(name)
+        except OSError as exc:
+            errors.append(f"{name}: {exc}")
+    if errors:
+        return [f"Could not remove stale Chromium profile locks ({detail}): {'; '.join(errors)}"]
+    if removed:
+        return [f"Removed stale Chromium profile locks ({detail}): {', '.join(removed)}."]
+    return []
 
 
 def extract_x_author(status_url: str, text: str) -> str:

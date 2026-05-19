@@ -10,7 +10,7 @@ class FollowingAccountAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             auditor = FollowingAccountAuditor(
                 profile_dir=Path(tmpdir) / "profile",
-                owner="Ctb0k33",
+                owner="ExampleResearcher",
                 output_dir=Path(tmpdir) / "out",
                 config_path=None,
                 max_profiles=10,
@@ -42,7 +42,7 @@ class FollowingAccountAuditTests(unittest.TestCase):
     def test_render_markdown_shows_candidate_count(self):
         markdown = render_markdown(
             {
-                "owner": "Ctb0k33",
+                "owner": "ExampleResearcher",
                 "generated_at": "2026-05-10T00:00:00+00:00",
                 "posts_per_profile": 3,
                 "min_post_score": 4,

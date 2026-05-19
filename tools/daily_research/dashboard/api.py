@@ -20,9 +20,10 @@ from ..core.roles import DEFAULT_ROLE, available_roles, load_role_config, normal
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIG = "tools/daily_research/config/selected_x_profiles.config.json"
 DEFAULT_OUTPUT_DIR = "outputs/daily_research"
-DEFAULT_PROFILE_DIR = "profiles/ctb0k33"
+DEFAULT_PROFILE_DIR = os.environ.get("DAILY_RESEARCH_PROFILE_DIR", "profiles/x_profile")
 DEFAULT_FEEDBACK_PATH = "outputs/daily_research/feedback_store.json"
 DEFAULT_TIMEZONE = "Asia/Saigon"
+DEFAULT_HEADLESS = os.environ.get("DAILY_RESEARCH_HEADLESS", "").lower() in {"1", "true", "yes"}
 COLLECTION_LOCK = threading.Lock()
 
 
@@ -119,7 +120,9 @@ def run_collection(payload: dict[str, Any]) -> dict[str, Any]:
     if config_path:
         command.extend(["--config", str(config_path)])
 
-    if payload.get("headless"):
+    headless_value = payload.get("headless")
+    use_headless = DEFAULT_HEADLESS if headless_value is None else bool(headless_value)
+    if use_headless:
         command.append("--headless")
     if payload.get("skipX"):
         command.append("--skip-x")

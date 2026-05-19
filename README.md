@@ -142,7 +142,7 @@ Run the collector for a specific role:
 python -m tools.daily_research.daily_research_tool `
   --role researcher `
   --date 2026-05-16 `
-  --profile-dir "profiles\ctb0k33"
+  --profile-dir "profiles\x_profile"
 ```
 
 Other roles:
@@ -179,7 +179,7 @@ Important config fields:
 
 - `role`: role profile used by the Telegram bot, usually `researcher`, `bd`, `marketing`, or `operations`.
 - `interval_minutes`: default polling interval, usually `30`.
-- `profile_dir`: browser profile for X, default `profiles/ctb0k33`.
+- `profile_dir`: browser profile for X, default `profiles/x_profile`.
 - `daily_research_config`: optional extra override config. Leave empty to use the selected role config directly.
 - `state_path`: local state file used for sent-post de-duplication and Telegram runtime settings.
 - `lock_path`: process lock that prevents multiple Telegram bot instances from sending duplicate posts.
@@ -331,6 +331,118 @@ Logs are saved to:
 outputs/daily_research/telegram_logs/
 ```
 
+### Docker / macOS Telegram Bot
+
+Docker is the recommended cross-platform path for macOS and Linux users. It
+replaces Windows Task Scheduler with Docker's `restart: unless-stopped` process
+supervision.
+
+The Docker setup defaults to `linux/amd64` because that is the safest target for
+Windows Docker Desktop and Playwright Chromium. On Apple Silicon, Docker Desktop
+can run this through emulation. If you explicitly want to try native ARM64, set
+`DAILY_RESEARCH_DOCKER_PLATFORM=linux/arm64` before building.
+
+Important: host Chrome cookies are usually encrypted by the host OS, so do not
+copy a Windows or macOS Chrome profile into Docker and expect X login to work.
+Instead, create a Docker-owned X profile once, then let the Telegram bot reuse
+that profile.
+
+Create a Telegram-only environment file from the template:
+
+```bash
+cp docker/env.example .env.telegram
+```
+
+Edit `.env.telegram`:
+
+```text
+TELEGRAM_BOT_TOKEN=<YOUR_TELEGRAM_BOT_TOKEN>
+TELEGRAM_CHAT_ID=<YOUR_TELEGRAM_CHAT_ID>
+```
+
+Keep `.env.telegram` local and do not share `docker compose config` output from
+a machine that has real credentials loaded.
+
+Build the Docker image:
+
+```bash
+docker compose build
+```
+
+One-time X login:
+
+```bash
+docker compose --profile login up x-login
+```
+
+Open this URL on the host machine:
+
+```text
+http://localhost:7900/vnc.html
+```
+
+Use the browser shown in noVNC to sign in to X. The authenticated profile is
+stored in:
+
+```text
+profiles/x_profile
+```
+
+After login succeeds, stop the login service with `Ctrl+C`, then start the
+Telegram bot:
+
+```bash
+docker compose up -d telegram-bot
+```
+
+Do not leave `x-login` running while the bot or dashboard collects X data.
+`x-login` and `telegram-bot` share the same Docker profile, so a running login
+container will lock `profiles/x_profile`.
+
+After a machine restart, open Docker Desktop and start only `telegram-bot`.
+Starting it from the Docker Desktop UI is equivalent to:
+
+```bash
+docker compose up -d telegram-bot
+```
+
+Docker controls:
+
+```bash
+docker compose logs -f telegram-bot
+docker compose restart telegram-bot
+docker compose stop telegram-bot
+docker compose down
+```
+
+Register Telegram commands from Docker:
+
+```bash
+docker compose run --rm telegram-bot python -m tools.daily_research.register_telegram_commands
+```
+
+Docker uses:
+
+```text
+tools/daily_research/config/telegram_bot.docker.json
+```
+
+The Docker config defaults to `profiles/x_profile`, runs headless, persists
+outputs under `outputs/`, and keeps Telegram state under
+`outputs/daily_research/telegram_state_researcher.json`.
+
+Docker-specific runtime defaults are set in `docker-compose.yml`:
+
+```text
+DAILY_RESEARCH_PROFILE_DIR=profiles/x_profile
+DAILY_RESEARCH_HEADLESS=1
+DAILY_RESEARCH_PREFER_BUNDLED_CHROMIUM=1
+DAILY_RESEARCH_UNLOCK_STALE_PROFILE=1
+```
+
+These keep the collector headless, use Playwright's bundled Chromium, and clean
+stale Chromium profile locks left by an old login container.
+
 ## 3. X / ethresear.ch Dashboard
 
 Use this workflow when you want to run daily collection from a local web UI,
@@ -375,7 +487,7 @@ Direct script usage:
 python -m tools.daily_research.daily_research_tool `
   --role researcher `
   --date 2026-05-10 `
-  --profile-dir "profiles\ctb0k33" `
+  --profile-dir "profiles\x_profile" `
   --output-dir "outputs\daily_research\researcher"
 ```
 

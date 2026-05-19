@@ -51,7 +51,7 @@ tools/daily_research/open_chrome_profile.py
 tools/daily_research/following_account_audit.py
 ```
 
-This helper opens a project-local Chrome profile such as `profiles/ctb0k33` so
+This helper opens a project-local Chrome profile such as `profiles/x_profile` so
 the user can sign in to X once. The daily collector should normally use
 Playwright against that persistent profile.
 
@@ -123,7 +123,7 @@ Write daily_research_digest.md and daily_research_digest.json
   recently returned `429 Too Many Requests`.
 - Add keyword categories under `keyword_categories`.
 - Use `tools.daily_research.open_chrome_profile` to create a dedicated
-  project-local profile for an X account such as `ctb0k33`.
+  project-local profile for the user's X account.
 - Use `--x-backend chrome-cdp` only for advanced debugging or attaching to a
   Chrome instance that was explicitly started with a DevTools endpoint.
 - Add another source by implementing a collector that returns `ResearchItem`

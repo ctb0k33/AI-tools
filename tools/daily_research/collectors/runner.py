@@ -97,47 +97,54 @@ class XCollector:
             )
         elif is_signed_in is None:
             warnings.append(login_message)
+        if os.environ.get("DAILY_RESEARCH_UNLOCK_STALE_PROFILE", "").lower() in {"1", "true", "yes"}:
+            warnings.extend(unlock_stale_chromium_profile(self.profile_dir))
 
         with sync_playwright() as playwright:
             context = None
             try:
-                try:
+                prefer_bundled_chromium = os.environ.get("DAILY_RESEARCH_PREFER_BUNDLED_CHROMIUM", "").lower() in {
+                    "1",
+                    "true",
+                    "yes",
+                }
+                launch_kwargs = {
+                    "user_data_dir": str(self.profile_dir),
+                    "headless": self.headless,
+                    "slow_mo": self.slow_mo,
+                    "viewport": {"width": 1400, "height": 950},
+                    "args": [
+                        "--disable-blink-features=AutomationControlled",
+                        "--disable-session-crashed-bubble",
+                        "--no-first-run",
+                    ],
+                }
+                if prefer_bundled_chromium:
                     context = playwright.chromium.launch_persistent_context(
-                        user_data_dir=str(self.profile_dir),
-                        channel="chrome",
-                        headless=self.headless,
-                        slow_mo=self.slow_mo,
-                        viewport={"width": 1400, "height": 950},
-                        args=[
-                            "--disable-blink-features=AutomationControlled",
-                            "--disable-session-crashed-bubble",
-                            "--no-first-run",
-                        ],
+                        **launch_kwargs,
                     )
-                except Exception as exc:
-                    warnings.append(
-                        "Chrome channel failed with the persistent X profile; "
-                        f"falling back to bundled Chromium. Original error: {exc}"
-                    )
+                else:
                     try:
                         context = playwright.chromium.launch_persistent_context(
-                            user_data_dir=str(self.profile_dir),
-                            headless=self.headless,
-                            slow_mo=self.slow_mo,
-                            viewport={"width": 1400, "height": 950},
-                            args=[
-                                "--disable-blink-features=AutomationControlled",
-                                "--disable-session-crashed-bubble",
-                                "--no-first-run",
-                            ],
+                            channel="chrome",
+                            **launch_kwargs,
                         )
-                    except Exception as fallback_exc:
+                    except Exception as exc:
                         warnings.append(
-                            "Could not launch any browser with the persistent X profile. "
-                            f"Close any Chrome/Chromium window using '{self.profile_dir}', then retry. "
-                            f"Fallback error: {fallback_exc}"
+                            "Chrome channel failed with the persistent X profile; "
+                            f"falling back to bundled Chromium. Original error: {exc}"
                         )
-                        return [], warnings
+                        try:
+                            context = playwright.chromium.launch_persistent_context(
+                                **launch_kwargs,
+                            )
+                        except Exception as fallback_exc:
+                            warnings.append(
+                                "Could not launch any browser with the persistent X profile. "
+                                f"Close any Chrome/Chromium window using '{self.profile_dir}', then retry. "
+                                f"Fallback error: {fallback_exc}"
+                            )
+                            return [], warnings
 
                 page = context.new_page()
                 self._close_restored_pages(context, keep_page=page)
@@ -624,7 +631,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     )
     following_config = config.get("x_following", {})
     include_following = bool(following_config.get("enabled", False)) and not args.skip_x_following
-    following_owner = str(args.following_owner or following_config.get("owner", "Ctb0k33"))
+    following_owner = str(args.following_owner or following_config.get("owner", ""))
     max_following_profiles = int(args.max_following_profiles or following_config.get("max_profiles", 80))
     max_items_per_following_profile = int(
         args.max_following_items_per_profile or following_config.get("max_items_per_profile", 4)
@@ -741,7 +748,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Also include this many local days before --date. Config default: 1.",
     )
     parser.add_argument("--timezone", default="Asia/Saigon", help="Timezone used for date filtering.")
-    parser.add_argument("--profile-dir", default="profiles/ctb0k33", help="Persistent Chrome profile for X.")
+    parser.add_argument("--profile-dir", default="profiles/x_profile", help="Persistent Chrome profile for X.")
     parser.add_argument(
         "--role",
         default=DEFAULT_ROLE,
@@ -785,7 +792,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-x-profiles", action="store_true", help="Skip configured X profile collection.")
     parser.add_argument("--max-x-profile-items", type=int, help="Max recent posts per configured profile.")
     parser.add_argument("--skip-x-following", action="store_true", help="Skip followed profile collection.")
-    parser.add_argument("--following-owner", help="X account whose following list should be used, e.g. Ctb0k33.")
+    parser.add_argument("--following-owner", help="X account whose following list should be used, e.g. your X handle.")
     parser.add_argument("--max-following-profiles", type=int, help="Max followed profiles to scan.")
     parser.add_argument(
         "--max-following-items-per-profile",

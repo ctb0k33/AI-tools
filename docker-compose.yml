@@ -1,0 +1,52 @@
+services:
+  telegram-bot:
+    platform: ${DAILY_RESEARCH_DOCKER_PLATFORM:-linux/amd64}
+    build:
+      context: .
+      dockerfile: Dockerfile.daily-research
+    image: daily-research-bot:local
+    env_file:
+      - path: .env.telegram
+        required: false
+    environment:
+      TZ: Asia/Saigon
+      PYTHONUNBUFFERED: "1"
+      DAILY_RESEARCH_PROFILE_DIR: profiles/x_profile
+      DAILY_RESEARCH_HEADLESS: "1"
+      DAILY_RESEARCH_PREFER_BUNDLED_CHROMIUM: "1"
+      DAILY_RESEARCH_UNLOCK_STALE_PROFILE: "1"
+    volumes:
+      - ./outputs:/app/outputs
+      - ./profiles:/app/profiles
+      - ./tools/daily_research/config:/app/tools/daily_research/config
+    ports:
+      - "127.0.0.1:8765:8765"
+      - "127.0.0.1:5173:5173"
+    command:
+      - python
+      - -m
+      - tools.daily_research.telegram_digest_bot
+      - --config
+      - tools/daily_research/config/telegram_bot.docker.json
+    restart: unless-stopped
+
+  x-login:
+    platform: ${DAILY_RESEARCH_DOCKER_PLATFORM:-linux/amd64}
+    build:
+      context: .
+      dockerfile: Dockerfile.daily-research
+    image: daily-research-bot:local
+    profiles:
+      - login
+    environment:
+      PROFILE_DIR: /app/profiles/x_profile
+      LOGIN_URL: https://x.com/home
+      DISPLAY: :99
+      SCREEN_GEOMETRY: 1440x1000x24
+      CHROME_NO_SANDBOX: "1"
+    volumes:
+      - ./profiles:/app/profiles
+    ports:
+      - "127.0.0.1:7900:7900"
+    command:
+      - /app/docker/x-login.sh

@@ -191,7 +191,6 @@ function App() {
           date: collectionDate,
           timezone: "Asia/Saigon",
           role: selectedRole,
-          profileDir: "profiles/ctb0k33",
           xBackend: "playwright",
         }),
       });

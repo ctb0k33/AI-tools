@@ -46,8 +46,12 @@ def launch_profile(args: argparse.Namespace) -> dict[str, str | int]:
         f"--user-data-dir={profile_dir}",
         "--no-first-run",
         "--disable-first-run-ui",
-        args.start_url,
     ]
+    if os.environ.get("CHROME_NO_SANDBOX") == "1":
+        command.append("--no-sandbox")
+    if os.environ.get("CHROME_DISABLE_DEV_SHM", "1") != "0":
+        command.append("--disable-dev-shm-usage")
+    command.append(args.start_url)
     process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return {
         "pid": process.pid,
@@ -61,7 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Open a dedicated Chrome profile with a DevTools endpoint for daily research collection."
     )
-    parser.add_argument("--profile-dir", default="profiles/ctb0k33", help="Chrome user-data-dir to create/open.")
+    parser.add_argument("--profile-dir", default="profiles/x_profile", help="Chrome user-data-dir to create/open.")
     parser.add_argument("--debug-port", type=int, default=9222, help="Chrome DevTools remote debugging port.")
     parser.add_argument("--start-url", default="https://x.com/home", help="Initial URL to open.")
     parser.add_argument("--chrome-path", help="Optional explicit Chrome executable path.")
@@ -82,4 +86,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

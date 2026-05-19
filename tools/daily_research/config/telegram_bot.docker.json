@@ -19,11 +19,13 @@
   "skip_ethresearch": false,
   "headless": true,
   "dashboard": {
-    "api_host": "127.0.0.1",
+    "api_host": "0.0.0.0",
     "api_port": 8765,
-    "frontend_host": "127.0.0.1",
+    "api_display_host": "127.0.0.1",
+    "frontend_host": "0.0.0.0",
     "frontend_port": 5173,
-    "open_browser": true,
+    "frontend_display_host": "127.0.0.1",
+    "open_browser": false,
     "log_dir": "outputs/daily_research/dashboard_logs"
   }
 }

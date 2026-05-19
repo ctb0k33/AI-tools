@@ -72,7 +72,7 @@ def run_daily_research(config: dict[str, Any]) -> dict[str, Any]:
         "--timezone",
         str(config.get("timezone") or "Asia/Saigon"),
         "--profile-dir",
-        str(project_path(config.get("profile_dir"), "profiles/ctb0k33")),
+        str(project_path(config.get("profile_dir"), "profiles/x_profile")),
         "--role",
         role,
         "--output-dir",

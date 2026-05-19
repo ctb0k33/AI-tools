@@ -93,8 +93,8 @@ Default profile selection:
 
 - Use `profiles\chrome profile` for YouTube transcript extraction. This is the project-local
   Chrome profile expected to be signed in to YouTube.
-- Do not use `profiles\ctb0k33` for YouTube unless the user explicitly asks for it; that
-  profile is intended for X/daily research workflows.
+- Do not use the X/daily-research browser profile for YouTube unless the user explicitly asks
+  for it; keep YouTube transcript extraction on the dedicated YouTube profile.
 - If the user provides a different YouTube profile, use that exact path.
 - If YouTube shows "Sign in to confirm that you're not a bot" or a visible "Sign in" button,
   stop and report that the active profile is not signed in or is not the expected YouTube

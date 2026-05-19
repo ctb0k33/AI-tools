@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import os
 import random
 import sys
 import time
@@ -19,6 +20,7 @@ from ..core.research import (
     same_x_handle,
     technical_score_text,
     truncate_text,
+    unlock_stale_chromium_profile,
 )
 
 
@@ -113,6 +115,8 @@ class FollowingAccountAuditor:
             raise RuntimeError(f"Playwright import failed: {exc}") from exc
 
         self.profile_dir.mkdir(parents=True, exist_ok=True)
+        if os.environ.get("DAILY_RESEARCH_UNLOCK_STALE_PROFILE", "").lower() in {"1", "true", "yes"}:
+            warnings.extend(unlock_stale_chromium_profile(self.profile_dir))
         self.run_dir.mkdir(parents=True, exist_ok=True)
         audits: list[AccountAudit] = []
         warnings: list[str] = []
@@ -120,23 +124,33 @@ class FollowingAccountAuditor:
         with sync_playwright() as playwright:
             context = None
             try:
-                try:
+                prefer_bundled_chromium = os.environ.get("DAILY_RESEARCH_PREFER_BUNDLED_CHROMIUM", "").lower() in {
+                    "1",
+                    "true",
+                    "yes",
+                }
+                launch_kwargs = {
+                    "user_data_dir": str(self.profile_dir),
+                    "headless": self.headless,
+                    "slow_mo": self.slow_mo,
+                    "viewport": {"width": 1400, "height": 950},
+                    "args": ["--disable-blink-features=AutomationControlled", "--no-first-run"],
+                }
+                if prefer_bundled_chromium:
                     context = playwright.chromium.launch_persistent_context(
-                        user_data_dir=str(self.profile_dir),
-                        channel="chrome",
-                        headless=self.headless,
-                        slow_mo=self.slow_mo,
-                        viewport={"width": 1400, "height": 950},
-                        args=["--disable-blink-features=AutomationControlled", "--no-first-run"],
+                        **launch_kwargs,
                     )
-                except Exception as exc:
-                    warnings.append(f"Chrome channel failed, falling back to bundled Chromium: {exc}")
-                    context = playwright.chromium.launch_persistent_context(
-                        user_data_dir=str(self.profile_dir),
-                        headless=self.headless,
-                        slow_mo=self.slow_mo,
-                        viewport={"width": 1400, "height": 950},
-                    )
+                else:
+                    try:
+                        context = playwright.chromium.launch_persistent_context(
+                            channel="chrome",
+                            **launch_kwargs,
+                        )
+                    except Exception as exc:
+                        warnings.append(f"Chrome channel failed, falling back to bundled Chromium: {exc}")
+                        context = playwright.chromium.launch_persistent_context(
+                            **launch_kwargs,
+                        )
                 page = context.pages[0] if context.pages else context.new_page()
                 candidates = self._load_or_collect_following_candidates(page, warnings)
                 if not candidates:
@@ -525,8 +539,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Audit followed X accounts for DeFi/core research quality.")
-    parser.add_argument("--profile-dir", default="profiles/ctb0k33", help="Persistent Chrome profile for X.")
-    parser.add_argument("--owner", default="Ctb0k33", help="X account whose following list should be audited.")
+    parser.add_argument("--profile-dir", default="profiles/x_profile", help="Persistent Chrome profile for X.")
+    parser.add_argument("--owner", default="", help="X account whose following list should be audited.")
     parser.add_argument("--output-dir", default="outputs/daily_research/account_audit", help="Output directory.")
     parser.add_argument("--config", help="Optional daily research config path.")
     parser.add_argument("--max-profiles", type=int, default=80, help="Max followed profiles to audit.")
