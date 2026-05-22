@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.daily-research
+      args:
+        DAILY_RESEARCH_IMAGE_PLATFORM: ${DAILY_RESEARCH_DOCKER_PLATFORM:-linux/amd64}
     image: daily-research-bot:local
     env_file:
       - path: .env.telegram
@@ -35,6 +37,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.daily-research
+      args:
+        DAILY_RESEARCH_IMAGE_PLATFORM: ${DAILY_RESEARCH_DOCKER_PLATFORM:-linux/amd64}
     image: daily-research-bot:local
     profiles:
       - login

@@ -98,7 +98,10 @@ class XCollector:
         elif is_signed_in is None:
             warnings.append(login_message)
         if os.environ.get("DAILY_RESEARCH_UNLOCK_STALE_PROFILE", "").lower() in {"1", "true", "yes"}:
-            warnings.extend(unlock_stale_chromium_profile(self.profile_dir))
+            lock_warnings = unlock_stale_chromium_profile(self.profile_dir)
+            warnings.extend(lock_warnings)
+            if any("X login container appears active" in warning for warning in lock_warnings):
+                return [], warnings
 
         with sync_playwright() as playwright:
             context = None

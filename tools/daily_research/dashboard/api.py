@@ -78,6 +78,7 @@ def fail_on_blocking_collection_warnings(digest: dict[str, Any]) -> None:
     blocking_patterns = [
         "Could not launch any browser with the persistent X profile",
         "Could not launch Chrome with the persistent X profile",
+        "X login container appears active",
         "X profile is not signed in",
     ]
     for warning in warnings:

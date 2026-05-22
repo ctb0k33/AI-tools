@@ -539,6 +539,13 @@ def unlock_stale_chromium_profile(profile_dir: Path) -> list[str]:
     if not lock_path.exists() and not lock_path.is_symlink():
         return []
 
+    login_marker = profile_dir / ".x-login-active"
+    if login_marker.exists():
+        return [
+            "X login container appears active; profile is locked. "
+            f"Stop x-login before collecting X data. Marker: {login_marker}"
+        ]
+
     try:
         lock_target = os.readlink(lock_path) if lock_path.is_symlink() else lock_path.read_text(encoding="utf-8").strip()
     except OSError as exc:

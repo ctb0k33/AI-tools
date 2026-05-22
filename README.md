@@ -25,7 +25,6 @@ Local-only folders:
 ```text
 profiles/   # Signed-in browser profiles, ignored by git
 outputs/    # Generated reports, transcripts, logs, ignored by git
-demo/       # Local media/demo files, ignored by git
 ```
 
 Note: You need to set up browser profile for this tool to work
@@ -35,13 +34,17 @@ Note: You need to set up browser profile for this tool to work
 Use this workflow when you want to summarize many YouTube talks from a
 conference agenda and send the result to Notion.
 
-Recommended prompt:
+Recommended prompt (codex):
 
 ```text
 Use $youtube-report-skill to summarize all Day 1 topics in ETHCC9:
 https://ethcc.io/ethcc-9/agenda?date=2026-03-30
 
 Output report to https://www.notion.so/...
+```
+
+```
+Note: youtube-report-skill & notion plugin need to be installed
 ```
 
 What it does:
@@ -58,6 +61,47 @@ Before running:
 - Make sure the Notion connector/plugin is available if you want Notion output.
 - Make sure your agent ready to use `youtube-report-skill`
 - Generated artifacts are saved under `outputs\conference_reports\...`.
+
+### Configure YouTube Profile
+
+The YouTube transcript workflow uses a local Chrome profile that is separate
+from the X research profile:
+
+```text
+profiles/chrome profile
+```
+
+Open Chrome once with that profile, sign in to YouTube, then close Chrome before
+running a transcript batch:
+
+```powershell
+python -m tools.daily_research.open_chrome_profile `
+  --profile-dir "profiles\chrome profile" `
+  --start-url "https://www.youtube.com/"
+```
+
+On macOS/Linux:
+
+```bash
+python -m tools.daily_research.open_chrome_profile --profile-dir "profiles/chrome profile" --start-url "https://www.youtube.com/"
+```
+
+If Chrome is not auto-detected on macOS, pass the Chrome path explicitly:
+
+```bash
+python -m tools.daily_research.open_chrome_profile --profile-dir "profiles/chrome profile" --start-url "https://www.youtube.com/" --chrome-path "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+```
+
+Use this profile for YouTube transcript extraction:
+
+```powershell
+python -m tools.youtube.youtube_transcript_tool `
+  "https://www.youtube.com/watch?v=<VIDEO_ID>" `
+  --profile-dir "profiles\chrome profile"
+```
+
+Do not reuse the Docker X profile for YouTube. X and YouTube should have
+separate browser profiles so login state and automation locks do not interfere.
 
 Manual script version:
 
@@ -136,23 +180,6 @@ Each role controls:
 - Output directory.
 - Feedback store used for personalized ranking.
 
-Run the collector for a specific role:
-
-```powershell
-python -m tools.daily_research.daily_research_tool `
-  --role researcher `
-  --date 2026-05-16 `
-  --profile-dir "profiles\x_profile"
-```
-
-Other roles:
-
-```powershell
-python -m tools.daily_research.daily_research_tool --role bd
-python -m tools.daily_research.daily_research_tool --role marketing
-python -m tools.daily_research.daily_research_tool --role operations
-```
-
 Default role output examples:
 
 ```text
@@ -162,65 +189,64 @@ outputs/daily_research/marketing/
 outputs/daily_research/operations/
 ```
 
-Set Telegram credentials:
+### Customize Role Configs
 
-```powershell
-$env:TELEGRAM_BOT_TOKEN="<YOUR_TOKEN>"
-$env:TELEGRAM_CHAT_ID="<YOUR_CHAT_ID>"
-```
-
-Optional config file:
+Edit the role JSON file for the audience you want to tune. For example:
 
 ```text
-tools/daily_research/config/telegram_bot.config.example.json
+tools/daily_research/config/roles/researcher.config.json
 ```
 
-Important config fields:
+Add or remove X accounts in `x_profiles.handles`:
 
-- `role`: role profile used by the Telegram bot, usually `researcher`, `bd`, `marketing`, or `operations`.
-- `interval_minutes`: default polling interval, usually `30`.
-- `profile_dir`: browser profile for X, default `profiles/x_profile`.
-- `daily_research_config`: optional extra override config. Leave empty to use the selected role config directly.
-- `state_path`: local state file used for sent-post de-duplication and Telegram runtime settings.
-- `lock_path`: process lock that prevents multiple Telegram bot instances from sending duplicate posts.
-- `min_technical_score`: minimum score before sending an item.
-- `max_items_per_run`: max Telegram items per run.
-- `skip_ethresearch`: set `true` to only use X.
-- `headless`: set `true` for the scheduled Telegram bot so Chrome runs in the background.
-- `enable_telegram_feedback`: adds inline feedback buttons to each Telegram post.
-- `enable_telegram_commands`: enables bot commands such as `/role` and `/dashboard`.
-- `feedback_path`: shared feedback store used by the dashboard and Telegram bot.
-- `feedback_poll_seconds`: command/feedback polling interval when the bot runs continuously, usually `5`.
-- `dashboard`: local dashboard launcher settings used by the `/dashboard` Telegram command.
-
-The Telegram bot defaults to `headless: true` to avoid browser popups. For manual
-debugging, use the dashboard or run `daily_research_tool` without `--headless`.
-
-Telegram feedback buttons:
-
-```text
-Interested | Save | Not relevant | Hide author
+```json
+"x_profiles": {
+  "enabled": true,
+  "max_items_per_profile": 4,
+  "handles": [
+    "https://x.com/ethresearchbot",
+    "https://x.com/ethereum",
+    "https://x.com/<another_account>"
+  ]
+}
 ```
 
-The bot writes button clicks to:
+Add keywords or scoring terms in `keyword_categories` and
+`x_quality_filter.positive_terms`:
+
+```json
+"keyword_categories": {
+  "Core Protocol": ["ethereum core", "eip", "peerdas", "focil"],
+  "Security": ["audit", "exploit", "vulnerability", "oracle"]
+},
+"x_quality_filter": {
+  "positive_terms": {
+    "eip": 3,
+    "security alert": 4,
+    "postmortem": 3
+  },
+  "low_value_terms": ["airdrop", "giveaway", "price prediction"]
+}
+```
+
+Common role tuning fields:
+
+- `x_home.enabled`: include or skip the user's X home timeline.
+- `x_home.max_items`: how many home timeline posts to scan before filtering.
+- `x_profiles.handles`: curated accounts to scan directly.
+- `x_quality_filter.min_technical_score`: minimum score before a post is kept.
+- `x_quality_filter.low_value_terms`: phrases to filter out.
+- `personalization.feedback_path`: per-role feedback store.
+
+Feedback buttons from Telegram and the dashboard write to:
 
 ```text
 outputs/daily_research/feedback/<role>.json
 ```
 
-With the scheduled-task `--once` runner, feedback clicks are processed on the
-next scheduled run. For immediate button feedback, run the bot continuously:
+Future runs use that feedback to adjust ranking for the same role.
 
-```powershell
-python -m tools.daily_research.telegram_digest_bot
-```
-
-When continuous mode is active, Telegram button clicks are acknowledged within
-the configured `feedback_poll_seconds` window and the selected button is marked
-with `[x]`. Click the selected `[x]` button again to clear the active feedback
-and return the post to its initial button state.
-
-Telegram commands:
+Useful Telegram commands after the Docker bot is running:
 
 ```text
 /help
@@ -241,97 +267,11 @@ Telegram commands:
 /dashboard_stop
 ```
 
-Register these commands in Telegram's command menu:
+`/dashboard` starts the dashboard API/frontend inside the Docker bot container
+and returns `http://127.0.0.1:5173/`. `/dashboard_stop` stops only the dashboard;
+the Telegram bot keeps running.
 
-```powershell
-python -m tools.daily_research.register_telegram_commands
-```
-
-Run this once after setting `TELEGRAM_BOT_TOKEN`. The bot can still process
-typed commands before registration, but Telegram will not show them in the `/`
-autocomplete menu until `setMyCommands` has been called.
-
-The selected Telegram role is stored in the bot state file, so a user who only
-uses Telegram can switch roles without opening the dashboard. Future collection
-runs use that active role's profile list, scoring rules, output directory, and
-feedback store.
-
-`/status` shows the active role, current interval, last run, queued immediate
-run status, and dashboard API/frontend status.
-
-`/run` queues an immediate collection run with the active role. `/run bd` runs
-one immediate collection with the BD role without permanently changing the
-active role.
-
-`/interval` shows the current interval. `/interval 10m`, `/interval 30`, and
-`/interval 1h` update the running bot's interval without restarting it.
-`/interval reset` returns to the config file value.
-
-`/dashboard` starts the local Python API and Vite frontend if they are not
-already running, opens the browser on the machine running the bot, and sends the
-dashboard URL back to Telegram. The default URL is `http://127.0.0.1:5173/`.
-That local URL only works on the same computer; from a phone, use a LAN host,
-VPN, or tunnel if you need remote access.
-
-`/dashboard_stop` stops only the dashboard API and frontend processes that were
-started by `/dashboard`. The Telegram bot keeps running. You can also send
-`/dashboard stop`.
-
-Test without sending:
-
-```powershell
-python -m tools.daily_research.telegram_digest_bot --once --dry-run
-```
-
-Send one run:
-
-```powershell
-python -m tools.daily_research.telegram_digest_bot --once
-```
-
-Run continuously:
-
-```powershell
-python -m tools.daily_research.telegram_digest_bot
-```
-
-Install as a Windows Scheduled Task:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task.ps1
-```
-
-Install as a hidden Windows Scheduled Task, so no PowerShell window pops up:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task_hidden.ps1
-```
-
-Install as a hidden continuous background task, so inline feedback buttons work
-immediately between collection runs:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\daily_research\install_telegram_scheduled_task_hidden.ps1 -Continuous
-Start-ScheduledTask -TaskName "DailyResearchTelegramBot"
-```
-
-Task controls:
-
-```powershell
-Start-ScheduledTask -TaskName "DailyResearchTelegramBot"
-Stop-ScheduledTask -TaskName "DailyResearchTelegramBot"
-Disable-ScheduledTask -TaskName "DailyResearchTelegramBot"
-Enable-ScheduledTask -TaskName "DailyResearchTelegramBot"
-powershell -ExecutionPolicy Bypass -File tools\daily_research\uninstall_telegram_scheduled_task.ps1
-```
-
-Logs are saved to:
-
-```text
-outputs/daily_research/telegram_logs/
-```
-
-### Docker / macOS Telegram Bot
+### Docker Telegram Bot Setup
 
 Docker is the recommended cross-platform path for macOS and Linux users. It
 replaces Windows Task Scheduler with Docker's `restart: unless-stopped` process
@@ -340,7 +280,8 @@ supervision.
 The Docker setup defaults to `linux/amd64` because that is the safest target for
 Windows Docker Desktop and Playwright Chromium. On Apple Silicon, Docker Desktop
 can run this through emulation. If you explicitly want to try native ARM64, set
-`DAILY_RESEARCH_DOCKER_PLATFORM=linux/arm64` before building.
+`DAILY_RESEARCH_DOCKER_PLATFORM=linux/arm64` before building; the Compose file
+passes that platform to both the service and Dockerfile build stages.
 
 Important: host Chrome cookies are usually encrypted by the host OS, so do not
 copy a Windows or macOS Chrome profile into Docker and expect X login to work.
@@ -351,6 +292,12 @@ Create a Telegram-only environment file from the template:
 
 ```bash
 cp docker/env.example .env.telegram
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item docker\env.example .env.telegram
 ```
 
 Edit `.env.telegram`:
@@ -369,7 +316,17 @@ Build the Docker image:
 docker compose build
 ```
 
-One-time X login:
+#### Configure X Profile For Docker
+
+Docker cannot reliably reuse a normal Windows or macOS Chrome profile because
+host Chrome cookies are encrypted by the host OS. Create and use the Docker
+profile instead:
+
+```text
+profiles/x_profile
+```
+
+Start the temporary login container:
 
 ```bash
 docker compose --profile login up x-login
@@ -388,16 +345,66 @@ stored in:
 profiles/x_profile
 ```
 
-After login succeeds, stop the login service with `Ctrl+C`, then start the
-Telegram bot:
+After login succeeds, stop the login service with `Ctrl+C` or:
+
+```bash
+docker compose stop x-login
+```
+
+Only use `x-login` for first-time login or re-login. Do not leave it running
+while the bot or dashboard collects X data. `x-login` and `telegram-bot` share
+the same Docker profile, so a running login container will lock
+`profiles/x_profile`.
+
+The login container writes `profiles/x_profile/.x-login-active` while it is
+running. If collection reports that this marker is active, stop `x-login` before
+retrying. The bot only removes stale Chromium locks when this marker is absent.
+
+If noVNC opens but only shows a black screen, Chrome probably exited during
+login startup or the Docker X profile has a stale lock. Check the login logs:
+
+```bash
+docker compose logs --tail=120 x-login
+```
+
+Chrome startup logs are written inside the login container at:
+
+```text
+/tmp/chrome.log
+```
+
+If the profile keeps crashing and it has not been successfully signed in yet,
+reset it by backing up the old Docker profile and creating a fresh one.
+
+Windows PowerShell:
+
+```powershell
+docker compose stop x-login telegram-bot
+$ts = Get-Date -Format "yyyyMMdd_HHmmss"
+Move-Item "profiles\x_profile" "profiles\x_profile.bak_$ts"
+New-Item -ItemType Directory -Force "profiles\x_profile"
+docker compose --profile login up -d --force-recreate x-login
+```
+
+macOS/Linux:
+
+```bash
+docker compose stop x-login telegram-bot
+ts="$(date +%Y%m%d_%H%M%S)"
+mv profiles/x_profile "profiles/x_profile.bak_$ts"
+mkdir -p profiles/x_profile
+docker compose --profile login up -d --force-recreate x-login
+```
+
+Then reopen `http://localhost:7900/vnc.html` and sign in again. Only reset the
+profile when you are willing to sign in to X again, because the active Docker
+login session is stored in `profiles/x_profile`.
+
+Start the Telegram bot:
 
 ```bash
 docker compose up -d telegram-bot
 ```
-
-Do not leave `x-login` running while the bot or dashboard collects X data.
-`x-login` and `telegram-bot` share the same Docker profile, so a running login
-container will lock `profiles/x_profile`.
 
 After a machine restart, open Docker Desktop and start only `telegram-bot`.
 Starting it from the Docker Desktop UI is equivalent to:
@@ -420,6 +427,10 @@ Register Telegram commands from Docker:
 ```bash
 docker compose run --rm telegram-bot python -m tools.daily_research.register_telegram_commands
 ```
+
+Run this once after `.env.telegram` is configured. The bot can still process
+typed commands before registration, but Telegram will not show them in the `/`
+autocomplete menu until `setMyCommands` has been called.
 
 Docker uses:
 
@@ -445,23 +456,20 @@ stale Chromium profile locks left by an old login container.
 
 ## 3. X / ethresear.ch Dashboard
 
-Use this workflow when you want to run daily collection from a local web UI,
-filter by date, inspect the generated digest, and load previous results.
+The dashboard is opened from the Telegram bot in the Docker flow. Send:
 
-Terminal 1: start the Python API server:
-
-```powershell
-python -m tools.daily_research.dashboard_api
+```text
+/dashboard
 ```
 
-Terminal 2: start the frontend:
+The bot starts the API and frontend inside the `telegram-bot` container and
+returns:
 
-```powershell
-cd frontend
-npm.cmd run dev
+```text
+http://127.0.0.1:5173/
 ```
 
-Open the URL printed by Vite. From the UI you can:
+Open that URL on the same machine that is running Docker. From the UI you can:
 
 - Select a role profile: Researcher, BD, Marketing, or Operations.
 - Pick a target date.
@@ -470,51 +478,16 @@ Open the URL printed by Vite. From the UI you can:
 - Upload a JSON digest manually.
 - Mark items as `Interested`, `Save`, `Not relevant`, or `Hide author`.
 
-Feedback is stored locally at:
+Stop only the dashboard, while keeping the Telegram bot alive:
 
 ```text
-outputs/daily_research/feedback_store.json
+/dashboard_stop
 ```
 
-Future runs use this feedback to adjust ranking. Positive feedback boosts matching
-authors and technical signals; negative feedback lowers similar items or hidden
-authors. The raw technical score is preserved, while `personalized_score` is used
-for dashboard sorting and Telegram selection.
-
-Direct script usage:
-
-```powershell
-python -m tools.daily_research.daily_research_tool `
-  --role researcher `
-  --date 2026-05-10 `
-  --profile-dir "profiles\x_profile" `
-  --output-dir "outputs\daily_research\researcher"
-```
-
-Useful options:
-
-```powershell
-# Only collect ethresear.ch.
-python -m tools.daily_research.daily_research_tool --skip-x
-
-# Only collect X.
-python -m tools.daily_research.daily_research_tool --skip-ethresearch
-
-# Include configured X search sections.
-python -m tools.daily_research.daily_research_tool --include-x-search
-
-# Add one X profile for a single run.
-python -m tools.daily_research.daily_research_tool `
-  --x-profile "https://x.com/ethereum"
-
-# Add one custom X query.
-python -m tools.daily_research.daily_research_tool `
-  --x-query "MEV::MEV PBS ethereum"
-
-# Adjust quality filter.
-python -m tools.daily_research.daily_research_tool `
-  --x-min-technical-score 6
-```
+Feedback is stored per role and shared by Telegram and the dashboard. Positive
+feedback boosts matching authors and technical signals; negative feedback lowers
+similar items or hidden authors. The raw technical score is preserved, while
+`personalized_score` is used for dashboard sorting and Telegram selection.
 
 Output:
 
